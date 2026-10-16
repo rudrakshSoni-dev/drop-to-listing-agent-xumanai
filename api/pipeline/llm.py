@@ -35,6 +35,11 @@ class LLM(Protocol):
 class TransientLLMError(Exception):
     """An attempt failed in a way a retry or another model might fix."""
 
+    def __init__(self, message: str, *, retry_same_model: bool = True) -> None:
+        super().__init__(message)
+        # False when this model can't succeed soon (e.g. its daily quota is spent).
+        self.retry_same_model = retry_same_model
+
 
 async def call_with_fallback(
     call: Callable[[str], Awaitable[str]],
@@ -53,6 +58,8 @@ async def call_with_fallback(
             except TransientLLMError as exc:
                 last = exc
                 log.warning("llm %s attempt %d failed: %s", model, attempt + 1, exc)
+                if not exc.retry_same_model:
+                    break
                 if attempt + 1 < attempts_per_model:
                     await sleep(base_delay_s * 2**attempt * random.uniform(0.75, 1.25))
     raise PipelineError(ErrorCode.LLM_UNAVAILABLE, str(last)[:200])
@@ -104,7 +111,13 @@ class GeminiLLM:
                 )
             except errors.APIError as exc:
                 if exc.code in RETRYABLE_STATUS:
-                    raise TransientLLMError(f"{model}: {exc.code} {exc.status}") from exc
+                    # Free-tier daily caps reset once a day; only another model helps.
+                    daily_cap = exc.code == 429 and "PerDay" in str(exc)
+                    suffix = " (daily quota)" if daily_cap else ""
+                    raise TransientLLMError(
+                        f"{model}: {exc.code} {exc.status}{suffix}",
+                        retry_same_model=not daily_cap,
+                    ) from exc
                 raise PipelineError(ErrorCode.LLM_UNAVAILABLE, str(exc)[:200]) from exc
             if not response.text:
                 raise PipelineError(ErrorCode.LLM_SCHEMA_FAIL, "empty model response")

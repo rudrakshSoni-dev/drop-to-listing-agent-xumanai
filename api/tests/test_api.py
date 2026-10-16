@@ -24,7 +24,7 @@ async def test_upload_to_listing_end_to_end(client: httpx.AsyncClient, sample_vi
     assert stages == ["fetching", "transcribing", "extracting_frames", "analyzing", "guardrails"]
     assert events[-1] == {**events[-1], "kind": "done", "listing_id": drop_id}
     transcript = next(e for e in events if e["kind"] == "transcript")
-    assert len(transcript["lines"]) == 3  # type: ignore[arg-type]
+    assert len(transcript["lines"]) == 6  # type: ignore[arg-type]
 
     listing = (await client.get(f"/api/listings/{drop_id}")).json()
     assert listing["category"] == "academic_tutoring"
@@ -36,7 +36,7 @@ async def test_upload_to_listing_end_to_end(client: httpx.AsyncClient, sample_vi
     assert drop["status"] == "done" and drop["width"] == 320 and drop["height"] == 568
 
     vtt = await client.get(f"/api/drops/{drop_id}/captions.vtt")
-    assert vtt.text.startswith("WEBVTT") and "quadratics" in vtt.text
+    assert vtt.text.startswith("WEBVTT") and "fractions" in vtt.text
 
     # Reconnecting after completion replays the full history.
     replay = await _events(client, drop_id)

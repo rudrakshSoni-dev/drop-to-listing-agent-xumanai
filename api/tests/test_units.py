@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from app.routes.drops import to_webvtt
@@ -86,6 +88,19 @@ async def test_llm_gives_typed_error_when_every_model_is_overloaded() -> None:
     assert err.value.code == ErrorCode.LLM_UNAVAILABLE
 
 
+async def test_llm_skips_to_fallback_when_daily_quota_is_spent() -> None:
+    calls: list[str] = []
+
+    async def call(model: str) -> str:
+        calls.append(model)
+        if model == "primary":
+            raise TransientLLMError("429 daily", retry_same_model=False)
+        return "{}"
+
+    assert await call_with_fallback(call, ["primary", "backup"], sleep=_no_sleep) == "{}"
+    assert calls == ["primary", "backup"]
+
+
 async def test_llm_does_not_retry_permanent_errors() -> None:
     calls: list[str] = []
 
@@ -109,3 +124,36 @@ def test_response_schemas_are_accepted_by_gemini_sdk(schema: str) -> None:
     module, name = schema.split(".")
     model = getattr({"extract": extract, "transcribe": transcribe}[module], name)
     _transformers.t_schema(client.Client(api_key="offline")._api_client, model)
+
+
+def test_grounding_keeps_quoted_scores_and_caps_unsupported_ones() -> None:
+    heard = "I usually take sessions online and each session is of half an hour."
+    assert confidence.ground(0.9, "each session is of half an hour", heard) == 0.9
+    # Small paraphrase still counts.
+    assert confidence.ground(0.9, "each session is half an hour", heard) == 0.9
+    # No quote, or words that were never said, fall below the ask threshold.
+    assert confidence.ground(0.9, None, heard) < confidence.MISSING_THRESHOLD
+    assert confidence.ground(0.9, "small groups of four", heard) < confidence.MISSING_THRESHOLD
+    # A low self-report is never raised.
+    assert confidence.ground(0.2, "sessions online", heard) == 0.2
+
+
+def test_out_of_range_duration_is_clamped_and_asked() -> None:
+    from datetime import UTC, datetime
+
+    from app.schema_gen import Source
+    from pipeline.extract import ExtractedListing, build_listing
+
+    raw = json.loads(load_fixture("llm_math_tutor.json")["ExtractedListing"][0])
+    raw["duration_min"] = 360
+    line = TranscriptLine(start=0, end=3, text="My session is about six hours long")
+    raw["evidence"]["duration"] = "six hours long"
+    listing = build_listing(
+        ExtractedListing.model_validate(raw),
+        listing_id="x",
+        source=Source(type="upload", url=None, duration_s=3),
+        transcript=[line],
+        created_at=datetime.now(UTC),
+    )
+    assert listing.session.duration_min == 240
+    assert "session.duration_min" in listing.missing_fields

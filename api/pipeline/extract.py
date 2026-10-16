@@ -47,6 +47,15 @@ class FieldConfidence(BaseModel):
     caption: float
 
 
+class FieldEvidence(BaseModel):
+    """Exact transcript words that state each askable field, or null if never said."""
+
+    age_range: str | None
+    format_group: str | None
+    format_mode: str | None
+    duration: str | None
+
+
 class ExtractedListing(BaseModel):
     """What the LLM fills in. Kept flat because response schemas handle that best."""
 
@@ -60,11 +69,17 @@ class ExtractedListing(BaseModel):
     group: Literal["one_on_one", "small_group"]
     mode: Literal["virtual", "in_person", "hybrid"]
     max_group_size: int | None
-    duration_min: int = Field(ge=15, le=240)
+    # Wider than the listing's 15–240 so an unusual stated length ("six hours")
+    # comes back as said; build_listing clamps it and asks the Guide.
+    duration_min: int = Field(ge=5, le=720)
     skills: list[str] = Field(max_length=8)
     tags: list[str] = Field(max_length=10)
     caption: str = Field(max_length=150)
     confidence: FieldConfidence
+    evidence: FieldEvidence
+
+
+SESSION_MIN, SESSION_MAX = 15, 240
 
 
 def format_transcript(lines: list[TranscriptLine]) -> str:
@@ -84,7 +99,7 @@ async def extract(
     llm: LLM, transcript: list[TranscriptLine], duration_s: float, caption: str | None
 ) -> ExtractedListing:
     prompt = prompts.render(
-        "extract_v1",
+        "extract_v2",
         transcript=format_transcript(transcript),
         duration=f"{duration_s:.0f}",
         caption=caption or "(none)",
@@ -111,7 +126,12 @@ def build_listing(
     transcript: list[TranscriptLine],
     created_at: datetime,
 ) -> Listing:
-    c = extracted.confidence
+    c, ev = extracted.confidence, extracted.evidence
+    heard = " ".join(line.text for line in transcript)
+    duration = min(max(extracted.duration_min, SESSION_MIN), SESSION_MAX)
+    duration_score = confidence.ground(c.duration, ev.duration, heard)
+    if duration != extracted.duration_min:
+        duration_score = min(duration_score, confidence.UNGROUNDED_CAP)
     scores = confidence.clamp_scores(
         {
             "title": c.title,
@@ -119,10 +139,10 @@ def build_listing(
             "description": c.summary,
             "category": c.category,
             "subcategory": c.subcategory,
-            "age_range": c.age_range,
-            "format.group": c.format_group,
-            "format.mode": c.format_mode,
-            "session.duration_min": c.duration,
+            "age_range": confidence.ground(c.age_range, ev.age_range, heard),
+            "format.group": confidence.ground(c.format_group, ev.format_group, heard),
+            "format.mode": confidence.ground(c.format_mode, ev.format_mode, heard),
+            "session.duration_min": duration_score,
             "skills": c.skills,
             "tags": c.skills,
             "caption": c.caption,
@@ -145,9 +165,9 @@ def build_listing(
                 max_group_size=max(group_size, 2) if group_size else None,
             ),
             session=Session(
-                duration_min=extracted.duration_min,
+                duration_min=duration,
                 price_band=suggest_price_band(
-                    extracted.category, extracted.group, extracted.mode, extracted.duration_min
+                    extracted.category, extracted.group, extracted.mode, duration
                 ),
             ),
             skills=extracted.skills,
