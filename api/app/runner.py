@@ -95,7 +95,7 @@ async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
         await _persist_and_publish(drop_id, event)
 
     try:
-        listing = await run_pipeline(drop_input, LazyLLM(llm_factory), config, emit)
+        result = await run_pipeline(drop_input, LazyLLM(llm_factory), config, emit)
     except PipelineError as exc:
         log.warning("drop %s failed: %s", drop_id, exc)
         _finish(drop_id, "error", exc.code)
@@ -111,7 +111,8 @@ async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
 
     with db.session() as s:
         row = s.get(db.ListingRow, drop_id) or db.ListingRow(id=drop_id, data="")
-        row.data = listing.model_dump_json()
+        row.data = result.listing.model_dump_json()
+        row.llm_flags_json = json.dumps([f.model_dump() for f in result.llm_flags])
         s.add(row)
         s.commit()
     _finish(drop_id, "done")

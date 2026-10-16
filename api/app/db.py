@@ -33,6 +33,8 @@ class Drop(SQLModel, table=True):
 class ListingRow(SQLModel, table=True):
     id: str = Field(primary_key=True)  # same id as its Drop
     data: str
+    # Grounded LLM safety flags (JSON list), so saves re-run rules without a model call.
+    llm_flags_json: str | None = None
     updated_at: datetime = Field(default_factory=_now)
 
 

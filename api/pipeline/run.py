@@ -12,8 +12,8 @@ from typing import Any, Literal
 
 from starlette.concurrency import run_in_threadpool
 
-from app.schema_gen import Listing, Source, TranscriptLine
-from pipeline import extract, fetch, frames, probe, transcribe
+from app.schema_gen import GuardrailFlag, Listing, Source, TranscriptLine
+from pipeline import extract, fetch, frames, guardrails, probe, transcribe
 from pipeline.errors import ErrorCode, PipelineError
 from pipeline.llm import LLM, Media
 
@@ -41,7 +41,9 @@ class DropInput:
     caption: str | None
 
 
-async def run_pipeline(drop: DropInput, llm: LLM, config: RunConfig, emit: Emit) -> Listing:
+async def run_pipeline(
+    drop: DropInput, llm: LLM, config: RunConfig, emit: Emit
+) -> "PipelineResult":
     async def stage(name: Stage, detail: str | None = None) -> None:
         await emit({"kind": "stage", "stage": name, "detail": detail})
 
@@ -118,13 +120,33 @@ async def run_pipeline(drop: DropInput, llm: LLM, config: RunConfig, emit: Emit)
         thumbnail_frame=frame_set.thumbnail,
     )
 
-    # Guardrail rules and the LLM safety pass arrive in build step 5.
     await stage("guardrails", "Checking for youth-safety risks")
-    return listing
+    llm_flags = guardrails.ground_llm_flags(
+        (guardrails.LLMFlag(f.code, f.evidence, f.explanation) for f in extracted.safety_flags),
+        lines,
+        caption,
+    )
+    listing.guardrails = guardrails.evaluate(lines, caption, listing_copy(listing), llm_flags)
+    if listing.guardrails.flags:
+        n = len(listing.guardrails.flags)
+        await emit({"kind": "detail", "detail": f"Flagged {n} item{'s' * (n > 1)} for review"})
+    return PipelineResult(listing=listing, llm_flags=llm_flags)
+
+
+def listing_copy(listing: Listing) -> list[str]:
+    """The Guide-editable text that gets published, re-checked on every save."""
+    return [listing.title, listing.summary, listing.description, listing.caption]
+
+
+@dataclass(frozen=True)
+class PipelineResult:
+    listing: Listing
+    # Kept so later edits can re-run the rules without another model call.
+    llm_flags: list[GuardrailFlag]
 
 
 def _snippet(text: str, limit: int = 60) -> str:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
-__all__ = ["DropInput", "ErrorCode", "PipelineError", "RunConfig", "run_pipeline"]
+__all__ = ["DropInput", "ErrorCode", "PipelineError", "PipelineResult", "RunConfig", "run_pipeline"]

@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime
 from typing import Any
 
@@ -7,8 +8,9 @@ from sqlmodel import col, select
 
 from app import db
 from app.errors import ApiError
-from app.schema_gen import Listing, PriceBand
-from pipeline import confidence, pricing
+from app.schema_gen import GuardrailFlag, Listing, PriceBand
+from pipeline import confidence, guardrails, pricing
+from pipeline.run import listing_copy
 
 router = APIRouter(prefix="/api/listings", tags=["listings"])
 
@@ -88,12 +90,24 @@ def apply_patch(listing: Listing, patch: dict[str, Any]) -> Listing:
         raise ApiError(422, "LISTING_INVALID", f"{where}: {first['msg']}") from exc
 
 
+def recheck_guardrails(listing: Listing, row: db.ListingRow, post_caption: str | None) -> Listing:
+    """Re-run the rules on the edited text; the video's own flags (and the LLM's) persist."""
+    raw = json.loads(row.llm_flags_json) if row.llm_flags_json else []
+    llm_flags = [GuardrailFlag.model_validate(f) for f in raw]
+    listing.guardrails = guardrails.evaluate(
+        listing.transcript, post_caption, listing_copy(listing), llm_flags
+    )
+    return listing
+
+
 @router.patch("/{listing_id}")
 async def patch_listing(listing_id: str, patch: dict[str, Any]) -> dict[str, Any]:
     updated = apply_patch(_load(listing_id), patch)
     with db.session() as s:
         row = s.get(db.ListingRow, listing_id)
         assert row is not None
+        drop = s.get(db.Drop, listing_id)
+        updated = recheck_guardrails(updated, row, drop.caption if drop else None)
         row.data = updated.model_dump_json()
         row.updated_at = datetime.now(UTC)
         s.add(row)

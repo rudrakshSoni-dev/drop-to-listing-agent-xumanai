@@ -158,6 +158,11 @@ Youth services is a trust business, so this layer is a feature, not an afterthou
 
 Status rules: any `high` → `block` (the listing can't be published); any `med` → `warn`; otherwise `pass`. Regex rules run first and the LLM pass second; deduplicate by code.
 
+How it's built (`api/pipeline/guardrails.py`):
+- Regex rules cover `OFF_PLATFORM_CONTACT` and `GUARANTEED_OUTCOME` over the transcript (with timestamps), the post caption, and the listing text.
+- The LLM pass is the `safety_flags` field of the extract call (`extract_v4.md`), to keep one request per video. Each LLM flag must quote the transcript or caption (`quote_in_transcript`); ungrounded flags are dropped. Severity comes from the code table, never from the model.
+- Grounded LLM flags are stored with the listing (`ListingRow.llm_flags_json`); every `PATCH` re-runs the rules on the edited text, so removing contact details from the copy clears that flag, while flags from the video itself persist.
+
 ---
 
 ## 6. Evals

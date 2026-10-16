@@ -57,6 +57,21 @@ class FieldEvidence(BaseModel):
     duration: str | None
 
 
+class SafetyFlag(BaseModel):
+    """A youth-safety concern the model noticed, with the exact words that show it."""
+
+    code: Literal[
+        "OFF_PLATFORM_CONTACT",
+        "PRIVATE_MEETING_MINOR",
+        "UNVERIFIED_CREDENTIAL",
+        "AGE_MISMATCH",
+        "GUARANTEED_OUTCOME",
+        "UNSAFE_ACTIVITY",
+    ]
+    evidence: str
+    explanation: str
+
+
 class ExtractedListing(BaseModel):
     """What the LLM fills in. Kept flat because response schemas handle that best."""
 
@@ -78,6 +93,7 @@ class ExtractedListing(BaseModel):
     caption: str = Field(max_length=150)
     confidence: FieldConfidence
     evidence: FieldEvidence
+    safety_flags: list[SafetyFlag] = Field(default_factory=list, max_length=6)
 
 
 SESSION_MIN, SESSION_MAX = 15, 240
@@ -122,7 +138,7 @@ async def extract(
     frames: list[Media] | None = None,
 ) -> ExtractedListing:
     prompt = prompts.render(
-        "extract_v3",
+        "extract_v4",
         transcript=format_transcript(transcript),
         duration=f"{duration_s:.0f}",
         caption=caption or "(none)",

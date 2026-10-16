@@ -1,10 +1,11 @@
 "use client";
 
-import { MapPin, ShieldCheck, Shuffle, Video } from "lucide-react";
+import { MapPin, Shuffle, Video } from "lucide-react";
 import { useWatch } from "react-hook-form";
 
 import { ListingThumb } from "@/components/listing-thumb";
 import { PricePill } from "@/components/price-pill";
+import { SafetyPanel } from "@/components/safety-panel";
 import { SourceBadge } from "@/components/source-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -49,29 +50,13 @@ function PreviewCard({ listing }: { listing: Listing }) {
   );
 }
 
-/** Interim safety summary until guardrails land in build step 5. */
-function SafetySummary({ listing }: { listing: Listing }) {
-  return (
-    <Card className="gap-3 p-4 md:p-6">
-      <div className="flex items-center gap-3">
-        <ShieldCheck className="text-muted-foreground size-6" aria-hidden />
-        <div>
-          <p className="font-medium">No flags yet</p>
-          <p className="text-muted-foreground text-sm">
-            {listing.guardrails.flags.length === 0
-              ? "Youth-safety checks aren't enabled in this build."
-              : `${listing.guardrails.flags.length} flagged for review.`}
-          </p>
-        </div>
-      </div>
-      <p className="text-muted-foreground border-t pt-3 text-xs">
-        Automated checks flag content for review. They don&apos;t certify safety.
-      </p>
-    </Card>
-  );
-}
-
-export function ListingSidePanel({ listing }: { listing: Listing }) {
+export function ListingSidePanel({
+  listing,
+  onSeek,
+}: {
+  listing: Listing;
+  onSeek?: (seconds: number) => void;
+}) {
   return (
     <Tabs defaultValue="preview">
       <TabsList className="w-full">
@@ -82,10 +67,10 @@ export function ListingSidePanel({ listing }: { listing: Listing }) {
         <PreviewCard listing={listing} />
       </TabsContent>
       <TabsContent value="safety" className="mt-4">
-        <SafetySummary listing={listing} />
+        <SafetyPanel guardrails={listing.guardrails} onSeek={onSeek} />
       </TabsContent>
     </Tabs>
   );
 }
 
-export { PreviewCard, SafetySummary };
+export { PreviewCard };

@@ -9,7 +9,8 @@ import { toast } from "sonner";
 
 import { JsonViewer } from "@/components/json-viewer";
 import { ListingForm, type FieldMeta } from "@/components/listing-form";
-import { ListingSidePanel, PreviewCard, SafetySummary } from "@/components/listing-side-panel";
+import { ListingSidePanel, PreviewCard } from "@/components/listing-side-panel";
+import { SafetyPanel } from "@/components/safety-panel";
 import { StatusBadge } from "@/components/status-badge";
 import { TranscriptList } from "@/components/transcript-list";
 import { FrameStrip } from "@/components/frame-strip";
@@ -161,6 +162,11 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
     const video = videoRef.current;
     if (!video) return;
     video.currentTime = seconds;
+    // From the Safety tab the video may be off screen (or behind the preview sheet).
+    const box = video.getBoundingClientRect();
+    if (box.bottom < 0 || box.top > window.innerHeight) {
+      video.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
     void video.play().catch(() => undefined);
   };
 
@@ -204,7 +210,7 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
     </Card>
   );
   const formEl = <ListingForm meta={meta} missingFields={missing} />;
-  const side = <ListingSidePanel listing={listing} />;
+  const side = <ListingSidePanel listing={listing} onSeek={seek} />;
 
   let body;
   if (layout === "xl") {
@@ -285,7 +291,7 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
             <PreviewCard listing={listing} />
           </TabsContent>
           <TabsContent value="safety" className="mt-4">
-            <SafetySummary listing={listing} />
+            <SafetyPanel guardrails={listing.guardrails} onSeek={seek} />
           </TabsContent>
         </Tabs>
       </div>

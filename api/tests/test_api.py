@@ -136,3 +136,24 @@ async def test_price_suggestion_matches_pipeline_table(client: httpx.AsyncClient
         "/api/listings/price-suggestion", params={**params, "mode": "moon", "duration_min": 60}
     )
     assert bad.status_code == 422
+
+
+async def test_editing_contact_details_out_of_the_copy_clears_that_flag(
+    client: httpx.AsyncClient, sample_video: Path
+) -> None:
+    with sample_video.open("rb") as f:
+        resp = await client.post("/api/drops", files={"file": ("clip.mp4", f, "video/mp4")})
+    drop_id = resp.json()["drop_id"]
+    await _events(client, drop_id)
+    listing = (await client.get(f"/api/listings/{drop_id}")).json()
+    assert listing["guardrails"] == {"status": "pass", "flags": []}
+
+    added = await client.patch(
+        f"/api/listings/{drop_id}", json={"caption": "WhatsApp me to book: +1 415 555 0134"}
+    )
+    assert added.json()["guardrails"]["status"] == "block"
+    flag = added.json()["guardrails"]["flags"][0]
+    assert flag["code"] == "OFF_PLATFORM_CONTACT" and flag["timestamp_s"] is None
+
+    removed = await client.patch(f"/api/listings/{drop_id}", json={"caption": "Book a session!"})
+    assert removed.json()["guardrails"] == {"status": "pass", "flags": []}
