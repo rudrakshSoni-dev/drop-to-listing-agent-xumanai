@@ -51,6 +51,15 @@ evals/
 5. `POST /api/listings/{id}/book` → mock booking that returns a confirmation.
 6. `GET /api/evals` → latest results from `evals/results.json`.
 
+Supporting endpoints the UI also uses:
+- `GET /api/drops/{id}` → drop status, media URL, dimensions, transcript so far.
+- `POST /api/drops/{id}/retry` → re-run a failed drop on its saved media.
+- `GET /api/drops/{id}/captions.vtt` → WebVTT captions built from the transcript.
+- `GET /api/listings` → all listings (transcript omitted).
+- `/api/media/{drop_id}/{file}` → static media (source video, frames).
+
+SSE events are JSON objects with a `kind`: `stage` (`stage`, `detail`), `detail`, `media`, `transcript` (`lines`), `done` (`listing_id`), or `error` (`code`, `stage`). Each carries `seq` and `t` (ms since start). A listing shares its drop's id.
+
 ### Pipeline stages (api/pipeline/)
 | Stage | Module | Notes |
 |---|---|---|
@@ -96,7 +105,8 @@ The source of truth is `packages/schema/listing.schema.json`. Generate the Pydan
 
 Rules:
 - The category enum mirrors Xuman's public category list. Don't add categories without updating the evals.
-- `availability` is never inferred. It's always a `missing_field` the Guide fills in.
+- `availability` is never inferred. It's always a `missing_field` the Guide fills in. When set, it's a list of weekly slots `{ weekday: 0–6 (Mon=0), start: "HH:MM", end: "HH:MM" }`.
+- Guardrail flags may carry `timestamp_s` so the UI can jump the video to the evidence.
 - Price bands are **suggestions**. Base them on a static table in `api/pipeline/pricing.py` keyed by category, format, and mode, and label them "suggested" in the UI. Never present them as market data.
 
 ---

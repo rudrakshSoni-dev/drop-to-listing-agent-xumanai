@@ -1,0 +1,8 @@
+{
+  "TranscriptResult": [
+    "{\"segments\": [{\"start\": 0.0, \"end\": 3.2, \"text\": \"Hi, I'm Priya and today we're going to solve quadratics together.\"}, {\"start\": 3.2, \"end\": 7.5, \"text\": \"I tutor middle and high schoolers online, one on one, in hour-long sessions.\"}, {\"start\": 7.5, \"end\": 11.0, \"text\": \"We'll factor, complete the square, and build real confidence before tests.\"}]}"
+  ],
+  "ExtractedListing": [
+    "{\"title\": \"Quadratics Made Clear: 1:1 Algebra Tutoring\", \"summary\": \"Hour-long online sessions where your teen learns to factor, complete the square, and walk into algebra tests confident.\", \"description\": \"Priya works one on one with middle and high schoolers on quadratics.\\n\\n- Factoring step by step\\n- Completing the square\\n- Test prep and confidence building\", \"category\": \"academic_tutoring\", \"subcategory\": \"Algebra\", \"age_min\": 12, \"age_max\": 17, \"group\": \"one_on_one\", \"mode\": \"virtual\", \"max_group_size\": null, \"duration_min\": 60, \"skills\": [\"Factoring quadratics\", \"Completing the square\", \"Test preparation\"], \"tags\": [\"algebra\", \"math\", \"quadratics\", \"test prep\"], \"caption\": \"Quadratics don't have to be scary. 1:1 online algebra help for teens.\", \"confidence\": {\"title\": 0.9, \"summary\": 0.85, \"category\": 0.95, \"subcategory\": 0.9, \"age_range\": 0.7, \"format_group\": 0.95, \"format_mode\": 0.9, \"duration\": 0.9, \"skills\": 0.85, \"caption\": 0.8}}"
+  ]
+}
