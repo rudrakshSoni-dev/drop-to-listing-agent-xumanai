@@ -18,6 +18,16 @@ def _env(name: str, default: str = "") -> str:
 class Settings:
     gemini_api_key: str = field(default_factory=lambda: _env("GEMINI_API_KEY"))
     llm_model: str = field(default_factory=lambda: _env("LLM_MODEL"))
+    # Used after LLM_MODEL keeps returning overload/rate-limit errors. Optional.
+    llm_fallback_model: str = field(default_factory=lambda: _env("LLM_FALLBACK_MODEL"))
+    # Gemini thinking budget in tokens; 0 = off (fastest), "default" = model default.
+    llm_thinking_budget: int | None = field(
+        default_factory=lambda: (
+            None
+            if _env("LLM_THINKING_BUDGET", "0") == "default"
+            else int(_env("LLM_THINKING_BUDGET", "0") or 0)
+        )
+    )
     transcribe_backend: Literal["gemini", "whisper"] = field(
         default_factory=lambda: cast(
             Literal["gemini", "whisper"], _env("TRANSCRIBE_BACKEND", "gemini") or "gemini"

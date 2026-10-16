@@ -1,12 +1,21 @@
 """Thin LLM boundary. Gemini in production; a recorded-fixture client in tests."""
 
-from collections.abc import Callable
+import asyncio
+import logging
+import random
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Protocol
 
 from pydantic import BaseModel
 
 from pipeline.errors import ErrorCode, PipelineError
+
+log = logging.getLogger(__name__)
+
+# Overload and rate-limit responses are worth retrying; anything else (bad key,
+# bad request) fails the same way on every attempt.
+RETRYABLE_STATUS = frozenset({429, 500, 503, 504})
 
 
 @dataclass(frozen=True)
@@ -23,14 +32,50 @@ class LLM(Protocol):
         ...
 
 
+class TransientLLMError(Exception):
+    """An attempt failed in a way a retry or another model might fix."""
+
+
+async def call_with_fallback(
+    call: Callable[[str], Awaitable[str]],
+    models: list[str],
+    *,
+    attempts_per_model: int = 3,
+    base_delay_s: float = 1.0,
+    sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+) -> str:
+    """Try each model in order, retrying transient failures with jittered backoff."""
+    last: TransientLLMError | None = None
+    for model in models:
+        for attempt in range(attempts_per_model):
+            try:
+                return await call(model)
+            except TransientLLMError as exc:
+                last = exc
+                log.warning("llm %s attempt %d failed: %s", model, attempt + 1, exc)
+                if attempt + 1 < attempts_per_model:
+                    await sleep(base_delay_s * 2**attempt * random.uniform(0.75, 1.25))
+    raise PipelineError(ErrorCode.LLM_UNAVAILABLE, str(last)[:200])
+
+
 class GeminiLLM:
-    def __init__(self, api_key: str, model: str) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        fallback_model: str = "",
+        thinking_budget: int | None = 0,
+    ) -> None:
         if not api_key or not model:
             raise PipelineError(ErrorCode.LLM_UNAVAILABLE, "GEMINI_API_KEY and LLM_MODEL required")
         from google import genai
 
         self._client = genai.Client(api_key=api_key)
-        self._model = model
+        self._models = [model]
+        if fallback_model and fallback_model != model:
+            self._models.append(fallback_model)
+        # 0 turns thinking off: these are extraction tasks and latency is the budget.
+        self._thinking_budget = thinking_budget
 
     async def generate_json(
         self, *, prompt: str, schema: type[BaseModel], media: list[Media] | None = None
@@ -45,16 +90,27 @@ class GeminiLLM:
             response_mime_type="application/json",
             response_schema=schema,
             temperature=0.2,
+            thinking_config=(
+                None
+                if self._thinking_budget is None
+                else types.ThinkingConfig(thinking_budget=self._thinking_budget)
+            ),
         )
-        try:
-            response = await self._client.aio.models.generate_content(
-                model=self._model, contents=parts, config=config
-            )
-        except errors.APIError as exc:
-            raise PipelineError(ErrorCode.LLM_UNAVAILABLE, str(exc)[:200]) from exc
-        if not response.text:
-            raise PipelineError(ErrorCode.LLM_SCHEMA_FAIL, "empty model response")
-        return response.text
+
+        async def call(model: str) -> str:
+            try:
+                response = await self._client.aio.models.generate_content(
+                    model=model, contents=parts, config=config
+                )
+            except errors.APIError as exc:
+                if exc.code in RETRYABLE_STATUS:
+                    raise TransientLLMError(f"{model}: {exc.code} {exc.status}") from exc
+                raise PipelineError(ErrorCode.LLM_UNAVAILABLE, str(exc)[:200]) from exc
+            if not response.text:
+                raise PipelineError(ErrorCode.LLM_SCHEMA_FAIL, "empty model response")
+            return response.text
+
+        return await call_with_fallback(call, self._models)
 
 
 class FixtureLLM:

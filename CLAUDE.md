@@ -117,6 +117,8 @@ Rules:
 # api/.env
 GEMINI_API_KEY=
 LLM_MODEL=            # set to a current Gemini model; do not hardcode in code
+LLM_FALLBACK_MODEL=   # optional; tried after LLM_MODEL keeps returning 503/429
+LLM_THINKING_BUDGET=0 # 0 = thinking off (fastest); token count; or "default"
 TRANSCRIBE_BACKEND=gemini   # gemini | whisper
 MAX_VIDEO_SECONDS=180
 

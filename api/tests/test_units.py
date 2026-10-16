@@ -5,7 +5,7 @@ from app.schema_gen import TranscriptLine
 from pipeline import confidence
 from pipeline.errors import ErrorCode, PipelineError
 from pipeline.extract import extract
-from pipeline.llm import FixtureLLM
+from pipeline.llm import FixtureLLM, TransientLLMError, call_with_fallback
 from pipeline.pricing import suggest_price_band
 from pipeline.transcribe import _Segment, clean_segments
 from tests.conftest import load_fixture
@@ -57,3 +57,55 @@ async def test_extract_gives_up_after_second_failure() -> None:
     with pytest.raises(PipelineError) as err:
         await extract(llm, [], 10, None)
     assert err.value.code == ErrorCode.LLM_SCHEMA_FAIL
+
+
+async def _no_sleep(_: float) -> None:
+    return None
+
+
+async def test_llm_retries_transient_errors_then_falls_back() -> None:
+    calls: list[str] = []
+
+    async def call(model: str) -> str:
+        calls.append(model)
+        if model == "primary":
+            raise TransientLLMError("503")
+        return "{}"
+
+    out = await call_with_fallback(call, ["primary", "backup"], sleep=_no_sleep)
+    assert out == "{}"
+    assert calls == ["primary", "primary", "primary", "backup"]
+
+
+async def test_llm_gives_typed_error_when_every_model_is_overloaded() -> None:
+    async def call(model: str) -> str:
+        raise TransientLLMError(f"{model}: 503")
+
+    with pytest.raises(PipelineError) as err:
+        await call_with_fallback(call, ["a", "b"], attempts_per_model=2, sleep=_no_sleep)
+    assert err.value.code == ErrorCode.LLM_UNAVAILABLE
+
+
+async def test_llm_does_not_retry_permanent_errors() -> None:
+    calls: list[str] = []
+
+    async def call(model: str) -> str:
+        calls.append(model)
+        raise PipelineError(ErrorCode.LLM_UNAVAILABLE, "400 bad key")
+
+    with pytest.raises(PipelineError):
+        await call_with_fallback(call, ["a", "b"], sleep=_no_sleep)
+    assert calls == ["a"]
+
+
+@pytest.mark.parametrize("schema", ["extract.ExtractedListing", "transcribe.TranscriptResult"])
+def test_response_schemas_are_accepted_by_gemini_sdk(schema: str) -> None:
+    # The SDK rejects some valid Pydantic shapes (e.g. integer enums) before any
+    # request is sent; the fixture LLM can't catch that, so convert them here.
+    from google.genai import _transformers, client
+
+    from pipeline import extract, transcribe
+
+    module, name = schema.split(".")
+    model = getattr({"extract": extract, "transcribe": transcribe}[module], name)
+    _transformers.t_schema(client.Client(api_key="offline")._api_client, model)

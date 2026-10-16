@@ -60,7 +60,7 @@ class ExtractedListing(BaseModel):
     group: Literal["one_on_one", "small_group"]
     mode: Literal["virtual", "in_person", "hybrid"]
     max_group_size: int | None
-    duration_min: Literal[30, 45, 60, 90]
+    duration_min: int = Field(ge=15, le=240)
     skills: list[str] = Field(max_length=8)
     tags: list[str] = Field(max_length=10)
     caption: str = Field(max_length=150)

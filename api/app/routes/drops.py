@@ -26,7 +26,12 @@ def get_llm_factory() -> Callable[[], LLM]:
     if settings.llm_fixture:
         responses = json.loads(Path(settings.llm_fixture).read_text())
         return lambda: FixtureLLM(responses, cycle=True)
-    return lambda: GeminiLLM(settings.gemini_api_key, settings.llm_model)
+    return lambda: GeminiLLM(
+        settings.gemini_api_key,
+        settings.llm_model,
+        fallback_model=settings.llm_fallback_model,
+        thinking_budget=settings.llm_thinking_budget,
+    )
 
 
 LLMFactory = Annotated[Callable[[], LLM], Depends(get_llm_factory)]
