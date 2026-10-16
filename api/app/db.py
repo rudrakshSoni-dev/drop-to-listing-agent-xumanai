@@ -38,6 +38,16 @@ class ListingRow(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=_now)
 
 
+class Booking(SQLModel, table=True):
+    """A mock booking. The book route rejects a second booking for the same start time."""
+
+    id: str = Field(primary_key=True)
+    listing_id: str = Field(index=True)
+    starts_at: datetime
+    ends_at: datetime
+    created_at: datetime = Field(default_factory=_now)
+
+
 _engine: Engine | None = None
 
 

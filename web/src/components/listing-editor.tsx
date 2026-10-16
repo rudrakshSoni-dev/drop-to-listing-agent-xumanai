@@ -9,7 +9,8 @@ import { toast } from "sonner";
 
 import { JsonViewer } from "@/components/json-viewer";
 import { ListingForm, type FieldMeta } from "@/components/listing-form";
-import { ListingSidePanel, PreviewCard } from "@/components/listing-side-panel";
+import { BookingPreview } from "@/components/booking-preview";
+import { ListingSidePanel } from "@/components/listing-side-panel";
 import { SafetyPanel } from "@/components/safety-panel";
 import { StatusBadge } from "@/components/status-badge";
 import { TranscriptList } from "@/components/transcript-list";
@@ -40,6 +41,7 @@ import { api, apiUrl, ApiError, type DropInfo } from "@/lib/api";
 import { errorCopy } from "@/lib/errors";
 import {
   buildPatch,
+  focusField,
   listingFormSchema,
   toFormValues,
   type ListingFormValues,
@@ -124,10 +126,20 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
     f === "availability" ? !availability?.length : !isEdited(f),
   );
 
-  const save = form.handleSubmit(async (values) => {
+  /** Saves dirty fields. Resolves true when everything is saved (or nothing needed saving). */
+  const persist = async (): Promise<boolean> => {
+    let saved = false;
+    await form.handleSubmit(async (values) => {
+      saved = await persistValues(values);
+    })();
+    return saved;
+  };
+  const save = persist;
+
+  const persistValues = async (values: ListingFormValues): Promise<boolean> => {
     const dirty = form.formState.dirtyFields;
     const keys = Object.keys(dirty).filter((k) => anyDirty(dirty[k as keyof typeof dirty]));
-    if (keys.length === 0) return;
+    if (keys.length === 0) return true;
     try {
       const updated = await update.mutateAsync(buildPatch(values, keys));
       for (const key of Object.keys(listing.confidence)) {
@@ -135,13 +147,15 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
       }
       form.reset(toFormValues(updated));
       toast.success("Saved");
+      return true;
     } catch (err) {
       const copy = errorCopy(err instanceof ApiError ? err.code : null);
       toast.error(
         err instanceof ApiError && err.code === "LISTING_INVALID" ? err.message : copy.title,
       );
+      return false;
     }
-  });
+  };
   const saveRef = useRef(save);
   useEffect(() => {
     saveRef.current = save;
@@ -210,7 +224,20 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
     </Card>
   );
   const formEl = <ListingForm meta={meta} missingFields={missing} />;
-  const side = <ListingSidePanel listing={listing} onSeek={seek} />;
+  const mediaUrl = drop?.media_url ? apiUrl(drop.media_url) : null;
+  // Booking reads the saved listing, so unsaved edits (e.g. new availability) go first.
+  const ensureSaved = persist;
+  // The availability field is only beside the preview on wide layouts.
+  const formBeside = layout === "xl" || layout === "lg";
+  const preview = (
+    <BookingPreview
+      listing={listing}
+      mediaUrl={mediaUrl}
+      onBeforeBook={ensureSaved}
+      onSetAvailability={formBeside ? () => focusField("availability") : undefined}
+    />
+  );
+  const side = <ListingSidePanel listing={listing} onSeek={seek} preview={preview} />;
 
   let body;
   if (layout === "xl") {
@@ -288,7 +315,7 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
             {formEl}
           </TabsContent>
           <TabsContent value="preview" className="mt-4">
-            <PreviewCard listing={listing} />
+            {preview}
           </TabsContent>
           <TabsContent value="safety" className="mt-4">
             <SafetyPanel guardrails={listing.guardrails} onSeek={seek} />

@@ -1,12 +1,14 @@
 import json
+import uuid
 from datetime import UTC, datetime
+from datetime import date as date_type
 from typing import Any
 
 from fastapi import APIRouter, Query
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 from sqlmodel import col, select
 
-from app import db
+from app import booking, db
 from app.errors import ApiError
 from app.schema_gen import GuardrailFlag, Listing, PriceBand
 from pipeline import confidence, guardrails, pricing
@@ -113,3 +115,36 @@ async def patch_listing(listing_id: str, patch: dict[str, Any]) -> dict[str, Any
         s.add(row)
         s.commit()
     return updated.model_dump(mode="json")
+
+
+class BookRequest(BaseModel):
+    date: date_type
+    start: str = Field(pattern=r"^[0-2][0-9]:[0-5][0-9]$")
+
+
+@router.post("/{listing_id}/book", status_code=201)
+async def book(listing_id: str, body: BookRequest) -> dict[str, str]:
+    listing = _load(listing_id)
+    starts_at, ends_at = booking.validate_slot(listing, body.date, body.start, date_type.today())
+    with db.session() as s:
+        taken = s.exec(
+            select(db.Booking).where(
+                db.Booking.listing_id == listing_id, db.Booking.starts_at == starts_at
+            )
+        ).first()
+        if taken:
+            raise ApiError(409, "SLOT_TAKEN", "Someone just booked that time. Pick another.")
+        record = db.Booking(
+            id="bk_" + uuid.uuid4().hex[:10],
+            listing_id=listing_id,
+            starts_at=starts_at,
+            ends_at=ends_at,
+        )
+        s.add(record)
+        s.commit()
+    return {
+        "confirmation_id": record.id,
+        "listing_id": listing_id,
+        "starts_at": starts_at.isoformat(timespec="minutes"),
+        "ends_at": ends_at.isoformat(timespec="minutes"),
+    }

@@ -1,6 +1,7 @@
 import json
 import shutil
 from dataclasses import replace
+from datetime import date, timedelta
 from pathlib import Path
 
 import httpx
@@ -157,3 +158,46 @@ async def test_editing_contact_details_out_of_the_copy_clears_that_flag(
 
     removed = await client.patch(f"/api/listings/{drop_id}", json={"caption": "Book a session!"})
     assert removed.json()["guardrails"] == {"status": "pass", "flags": []}
+
+
+async def _ready_listing(client: httpx.AsyncClient, sample_video: Path) -> str:
+    with sample_video.open("rb") as f:
+        resp = await client.post("/api/drops", files={"file": ("clip.mp4", f, "video/mp4")})
+    drop_id: str = resp.json()["drop_id"]
+    await _events(client, drop_id)
+    return drop_id
+
+
+async def test_booking_validates_slots_and_blocks(
+    client: httpx.AsyncClient, sample_video: Path
+) -> None:
+    listing_id = await _ready_listing(client, sample_video)
+    day = date.today() + timedelta(days=2)
+    book = f"/api/listings/{listing_id}/book"
+
+    none_yet = await client.post(book, json={"date": day.isoformat(), "start": "16:00"})
+    assert none_yet.json()["error"]["code"] == "NO_AVAILABILITY"
+
+    slots = [{"weekday": day.weekday(), "start": "16:00", "end": "17:00"}]
+    await client.patch(f"/api/listings/{listing_id}", json={"availability": slots})
+    ok = await client.post(book, json={"date": day.isoformat(), "start": "16:00"})
+    assert ok.status_code == 201
+    body = ok.json()
+    assert body["starts_at"] == f"{day.isoformat()}T16:00"
+    assert body["ends_at"] == f"{day.isoformat()}T17:00"  # 60-minute session
+    assert body["confirmation_id"].startswith("bk_")
+
+    again = await client.post(book, json={"date": day.isoformat(), "start": "16:00"})
+    assert again.json()["error"]["code"] == "SLOT_TAKEN"
+    wrong_time = await client.post(book, json={"date": day.isoformat(), "start": "09:00"})
+    assert wrong_time.json()["error"]["code"] == "SLOT_UNAVAILABLE"
+    too_far = (day + timedelta(days=21)).isoformat()
+    far = await client.post(book, json={"date": too_far, "start": "16:00"})
+    assert far.json()["error"]["code"] == "SLOT_UNAVAILABLE"
+
+    await client.patch(f"/api/listings/{listing_id}", json={"caption": "DM me to book"})
+    blocked = await client.post(
+        book, json={"date": (day + timedelta(days=7)).isoformat(), "start": "16:00"}
+    )
+    assert blocked.status_code == 409
+    assert blocked.json()["error"]["code"] == "LISTING_BLOCKED"

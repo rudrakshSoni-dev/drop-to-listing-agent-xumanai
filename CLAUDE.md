@@ -48,7 +48,7 @@ evals/
    `fetching → transcribing → extracting_frames → analyzing → guardrails → done | error`
 3. `GET /api/listings/{id}` → the full `Listing` JSON.
 4. `PATCH /api/listings/{id}` → user edits from the form.
-5. `POST /api/listings/{id}/book` → mock booking that returns a confirmation.
+5. `POST /api/listings/{id}/book` `{date, start}` → mock booking that returns a confirmation (`confirmation_id`, `starts_at`, `ends_at` in the Guide's local time). It rejects blocked listings (`LISTING_BLOCKED`), times outside availability or the next 14 days (`SLOT_UNAVAILABLE`), and double bookings (`SLOT_TAKEN`). Nothing is charged or sent.
 6. `GET /api/evals` → latest results from `evals/results.json`.
 
 Supporting endpoints the UI also uses:

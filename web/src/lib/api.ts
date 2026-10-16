@@ -27,6 +27,14 @@ export interface DropInfo {
   created_at: string;
 }
 
+export interface BookingConfirmation {
+  confirmation_id: string;
+  listing_id: string;
+  /** Guide-local time, e.g. "2026-10-20T16:00". */
+  starts_at: string;
+  ends_at: string;
+}
+
 export type ListingSummary = Omit<Listing, "transcript">;
 
 export type ListingPatch = Partial<
@@ -110,6 +118,9 @@ export const api = {
       Object.entries(params).map(([k, v]) => [k, String(v)]),
     ).toString();
     return request(`/api/listings/price-suggestion?${query}`);
+  },
+  book(id: string, slot: { date: string; start: string }): Promise<BookingConfirmation> {
+    return request(`/api/listings/${id}/book`, { method: "POST", ...json(slot) });
   },
   eventsUrl(id: string): string {
     return apiUrl(`/api/drops/${id}/events`);
