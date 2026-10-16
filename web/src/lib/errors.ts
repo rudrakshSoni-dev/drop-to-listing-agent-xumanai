@@ -25,9 +25,32 @@ const COPY: Record<string, ErrorCopy> = {
     description: "Upload an mp4 or mov under 3 minutes.",
     retryable: false,
   },
-  LINKS_NOT_ENABLED: {
-    title: "Link import isn't on yet",
-    description: "Upload the video file for now. Link import is coming next.",
+  LINK_UNSUPPORTED: {
+    title: "We can't import that link",
+    description: "Paste a public Instagram, TikTok or YouTube link, or upload the file.",
+    retryable: false,
+  },
+  VIDEO_UNAVAILABLE: {
+    title: "That video isn't available",
+    description: "It may have been removed or region-locked. Try another link or upload the file.",
+    retryable: false,
+  },
+  FETCH_BLOCKED: {
+    title: "The platform blocked the download",
+    description:
+      "Some platforms ask for a login or block servers. Download the video yourself and upload it, or try an example.",
+    retryable: true,
+  },
+  LLM_QUOTA: {
+    title: "Today's free demo quota is used up",
+    description:
+      "This demo runs on a free AI tier. Try an example, or run it locally with your own free key.",
+    retryable: false,
+  },
+  RATE_LIMITED: {
+    title: "That's today's limit for new videos",
+    description:
+      "To keep the free demo up for everyone, each visitor gets a few videos a day. Try an example.",
     retryable: false,
   },
   TRANSCRIBE_FAIL: {

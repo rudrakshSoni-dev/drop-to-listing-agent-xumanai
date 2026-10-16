@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 
-from sqlalchemy import Engine
+from sqlalchemy import Engine, inspect, text
 from sqlmodel import Field, Session, SQLModel, create_engine
 
 
@@ -24,6 +24,9 @@ class Drop(SQLModel, table=True):
     width: int | None = None
     height: int | None = None
     transcript_json: str | None = None
+    frames_json: str | None = None
+    thumbnail: str | None = None
+    client_ip: str | None = None
     created_at: datetime = Field(default_factory=_now)
 
 
@@ -40,6 +43,20 @@ def init_db(url: str) -> None:
     global _engine
     _engine = create_engine(url, connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(_engine)
+    _add_missing_columns(_engine)
+
+
+def _add_missing_columns(engine: Engine) -> None:
+    """create_all() never alters existing tables; add new nullable columns in place."""
+    existing = inspect(engine)
+    with engine.begin() as conn:
+        for table in SQLModel.metadata.sorted_tables:
+            have = {c["name"] for c in existing.get_columns(table.name)}
+            for column in table.columns:
+                if column.name not in have and column.nullable:
+                    ddl = column.type.compile(engine.dialect)
+                    sql = f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {ddl}'
+                    conn.execute(text(sql))
 
 
 @contextmanager

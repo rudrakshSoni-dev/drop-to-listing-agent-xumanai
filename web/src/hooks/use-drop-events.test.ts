@@ -65,4 +65,31 @@ describe("dropEventsReducer", () => {
     expect(state.status).toBe("done");
     expect(state.replayed).toBe(true);
   });
+
+  it("records media url and key frames for link drops", () => {
+    const state = run(
+      ev({ kind: "stage", stage: "fetching", detail: "Downloading from YouTube" }, 0),
+      ev(
+        {
+          kind: "media",
+          duration_s: 30,
+          width: 720,
+          height: 1280,
+          media_url: "/api/media/a/source.mp4",
+        },
+        900,
+      ),
+      ev(
+        {
+          kind: "frames",
+          frames: [{ file: "frame_00.jpg", t: 1 }],
+          thumbnail: "frame_00.jpg",
+        },
+        1200,
+      ),
+    );
+    expect(state.media?.media_url).toBe("/api/media/a/source.mp4");
+    expect(state.frames).toHaveLength(1);
+    expect(state.thumbnail).toBe("frame_00.jpg");
+  });
 });

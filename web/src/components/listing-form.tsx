@@ -1,7 +1,7 @@
 "use client";
 
 import { Info, MapPin, Shuffle, Video } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 import { AvailabilityPicker } from "@/components/availability-picker";
@@ -24,13 +24,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CATEGORY_OPTIONS } from "@/lib/categories";
-import { ageLabel, GROUP_LABELS, MODE_LABELS } from "@/lib/format";
+import { api } from "@/lib/api";
+import { ageLabel, durationLabel, GROUP_LABELS, MODE_LABELS } from "@/lib/format";
 import { FIELD_IDS, type ListingFormValues } from "@/lib/listing-form";
 import { Markdown } from "@/lib/markdown";
 import { cn } from "@/lib/utils";
 
 const MODE_ICONS = { virtual: Video, in_person: MapPin, hybrid: Shuffle } as const;
-const DURATIONS = [30, 45, 60, 90] as const;
+const DURATIONS = [30, 45, 60, 90, 120, 180, 240];
+
+/** Standard lengths plus whatever the video said (e.g. 210), so the Select never blanks. */
+export function durationOptions(current: number): number[] {
+  return [...new Set([...DURATIONS, current])].sort((a, b) => a - b);
+}
 
 export interface FieldMeta {
   confidence: Record<string, number>;
@@ -84,6 +90,41 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+/**
+ * Keeps the suggested price in step with category, format, mode and length, until
+ * the Guide types their own price. Same static table the pipeline uses (pricing.py).
+ */
+function useSuggestedPrice() {
+  const form = useFormContext<ListingFormValues>();
+  const [category, group, mode, duration, band] = useWatch({
+    control: form.control,
+    name: ["category", "format.group", "format.mode", "session.duration_min", "session.price_band"],
+  });
+  const inputs = `${category}|${group}|${mode}|${duration}`;
+  const lastInputs = useRef(inputs);
+  const lastSuggested = useRef(band);
+
+  const { getValues, setValue } = form;
+  useEffect(() => {
+    if (inputs === lastInputs.current) return;
+    lastInputs.current = inputs;
+    const current = getValues("session.price_band");
+    const untouched =
+      current.min === lastSuggested.current.min && current.max === lastSuggested.current.max;
+    if (!untouched) return;
+    const requested = inputs;
+    api
+      .suggestPrice({ category, group, mode, duration_min: duration })
+      .then((next) => {
+        // Latest change wins; a slower, older response must not overwrite it.
+        if (lastInputs.current !== requested) return;
+        lastSuggested.current = next;
+        setValue("session.price_band", next, { shouldDirty: true, shouldValidate: true });
+      })
+      .catch(() => undefined); // keep the old suggestion; it's only a hint
+  }, [inputs, category, group, mode, duration, getValues, setValue]);
+}
+
 export function ListingForm({ meta, missingFields }: { meta: FieldMeta; missingFields: string[] }) {
   const form = useFormContext<ListingFormValues>();
   const [previewDescription, setPreviewDescription] = useState(false);
@@ -92,6 +133,7 @@ export function ListingForm({ meta, missingFields }: { meta: FieldMeta; missingF
     name: ["title", "summary", "caption", "description", "format.group", "session.duration_min"],
   });
   const priceBand = useWatch({ control: form.control, name: "session.price_band" });
+  useSuggestedPrice();
 
   return (
     <div className="space-y-6">
@@ -353,9 +395,9 @@ export function ListingForm({ meta, missingFields }: { meta: FieldMeta; missingF
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {DURATIONS.map((d) => (
+                  {durationOptions(field.value).map((d) => (
                     <SelectItem key={d} value={String(d)}>
-                      {d} min
+                      {durationLabel(d)}
                     </SelectItem>
                   ))}
                 </SelectContent>

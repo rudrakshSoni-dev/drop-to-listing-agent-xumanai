@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 function elapsedMs(stage: StageState, now: number): number | null {
   if (stage.startT === undefined) return null;
   if (stage.endT !== undefined) return Math.max(0, stage.endT - stage.startT);
-  if (stage.status === "active" && stage.receivedAt !== undefined) return Math.max(0, now - stage.receivedAt);
+  if (stage.status === "active" && stage.receivedAt !== undefined)
+    return Math.max(0, now - stage.receivedAt);
   return null;
 }
 
@@ -60,7 +61,11 @@ export function PipelineStepper({ state }: { state: DropEventsState }) {
             {completed}/{STAGES.length}
           </span>
         </div>
-        <Progress value={(completed / STAGES.length) * 100} aria-label="Overall progress" className="bg-muted" />
+        <Progress
+          value={(completed / STAGES.length) * 100}
+          aria-label="Overall progress"
+          className="bg-muted"
+        />
       </div>
 
       <p className="sr-only" aria-live="polite">

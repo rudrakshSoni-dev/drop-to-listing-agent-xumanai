@@ -38,3 +38,11 @@ export const STATUS_LABELS: Record<GuardrailStatus, string> = {
   warn: "Needs review",
   block: "Blocked",
 };
+
+/** 45 → "45 min", 120 → "2 h", 210 → "3 h 30 min". */
+export function durationLabel(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h} h ${m} min` : `${h} h`;
+}

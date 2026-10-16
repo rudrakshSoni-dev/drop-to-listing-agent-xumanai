@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { summarize, toSlots } from "@/components/availability-picker";
 import { anyDirty } from "@/components/listing-editor";
+import { durationOptions } from "@/components/listing-form";
+import { durationLabel } from "@/lib/format";
 import { buildPatch, toFormValues } from "@/lib/listing-form";
 import { ListingSchema, type Listing } from "@/lib/schema";
 
@@ -52,5 +54,18 @@ describe("form → patch", () => {
     expect(anyDirty({ age_range: { min: true } })).toBe(true);
     expect(anyDirty({ skills: [false, undefined] })).toBe(false);
     expect(anyDirty(undefined)).toBe(false);
+  });
+});
+
+describe("durations", () => {
+  it("labels long sessions in hours", () => {
+    expect(durationLabel(45)).toBe("45 min");
+    expect(durationLabel(120)).toBe("2 h");
+    expect(durationLabel(210)).toBe("3 h 30 min");
+  });
+
+  it("always offers the current length so the select never blanks", () => {
+    expect(durationOptions(60)).toEqual([30, 45, 60, 90, 120, 180, 240]);
+    expect(durationOptions(210)).toContain(210);
   });
 });

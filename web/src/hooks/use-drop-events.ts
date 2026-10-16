@@ -22,17 +22,32 @@ export interface DropEventsState {
   status: "connecting" | "running" | "done" | "error";
   stages: Record<StageKey, StageState>;
   transcript: TranscriptLine[] | null;
-  media: { duration_s: number; width: number | null; height: number | null } | null;
+  media: MediaInfo | null;
+  frames: FrameInfo[] | null;
+  thumbnail: string | null;
   errorCode: string | null;
   /** True when the terminal state came from a replay rather than a live run. */
   replayed: boolean;
   lastSeq: number;
 }
 
+export interface MediaInfo {
+  duration_s: number;
+  width: number | null;
+  height: number | null;
+  media_url: string | null;
+}
+
+export interface FrameInfo {
+  file: string;
+  t: number;
+}
+
 export type DropEvent =
   | { kind: "stage"; stage: Exclude<StageKey, "done">; detail: string | null }
   | { kind: "detail"; detail: string }
-  | { kind: "media"; duration_s: number; width: number | null; height: number | null }
+  | ({ kind: "media" } & MediaInfo)
+  | { kind: "frames"; frames: FrameInfo[]; thumbnail: string | null }
   | { kind: "transcript"; lines: TranscriptLine[] }
   | { kind: "done"; listing_id: string }
   | { kind: "error"; code: string; stage: StageKey | null };
@@ -50,6 +65,8 @@ export function initialState(): DropEventsState {
     stages,
     transcript: null,
     media: null,
+    frames: null,
+    thumbnail: null,
     errorCode: null,
     replayed: false,
     lastSeq: -1,
@@ -101,8 +118,15 @@ export function dropEventsReducer(state: DropEventsState, action: Action): DropE
     case "media":
       return {
         ...next,
-        media: { duration_s: event.duration_s, width: event.width, height: event.height },
+        media: {
+          duration_s: event.duration_s,
+          width: event.width,
+          height: event.height,
+          media_url: event.media_url ?? null,
+        },
       };
+    case "frames":
+      return { ...next, frames: event.frames, thumbnail: event.thumbnail };
     case "transcript":
       return { ...next, transcript: event.lines };
     case "done": {

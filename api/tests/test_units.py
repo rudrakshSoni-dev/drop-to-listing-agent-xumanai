@@ -1,13 +1,20 @@
 import json
+from pathlib import Path
 
 import pytest
 
 from app.routes.drops import to_webvtt
 from app.schema_gen import TranscriptLine
-from pipeline import confidence
+from pipeline import confidence, fetch, frames
 from pipeline.errors import ErrorCode, PipelineError
-from pipeline.extract import extract
-from pipeline.llm import FixtureLLM, TransientLLMError, call_with_fallback
+from pipeline.extract import ExtractedListing, extract
+from pipeline.llm import (
+    CachedLLM,
+    FixtureLLM,
+    TransientLLMError,
+    call_with_fallback,
+    reset_capped_models,
+)
 from pipeline.pricing import suggest_price_band
 from pipeline.transcribe import _Segment, clean_segments
 from tests.conftest import load_fixture
@@ -63,6 +70,11 @@ async def test_extract_gives_up_after_second_failure() -> None:
 
 async def _no_sleep(_: float) -> None:
     return None
+
+
+@pytest.fixture(autouse=True)
+def _fresh_model_caps() -> None:
+    reset_capped_models()
 
 
 async def test_llm_retries_transient_errors_then_falls_back() -> None:
@@ -157,3 +169,116 @@ def test_out_of_range_duration_is_clamped_and_asked() -> None:
     )
     assert listing.session.duration_min == 240
     assert "session.duration_min" in listing.missing_fields
+
+
+
+@pytest.mark.parametrize(
+    ("url", "source"),
+    [
+        ("https://www.youtube.com/shorts/abc", "youtube"),
+        ("https://youtu.be/abc", "youtube"),
+        ("https://m.youtube.com/watch?v=abc", "youtube"),
+        ("https://www.tiktok.com/@coach/video/1", "tiktok"),
+        ("https://vm.tiktok.com/ZM123/", "tiktok"),
+        ("https://www.instagram.com/reel/abc/", "instagram"),
+    ],
+)
+def test_detect_source(url: str, source: str) -> None:
+    assert fetch.detect_source(url) == source
+
+
+@pytest.mark.parametrize("url", ["https://vimeo.com/1", "ftp://youtube.com/x", "youtube.com/x",
+                                 "https://notyoutube.com/x"])
+def test_detect_source_rejects(url: str) -> None:
+    with pytest.raises(PipelineError) as err:
+        fetch.detect_source(url)
+    assert err.value.code == ErrorCode.LINK_UNSUPPORTED
+
+
+@pytest.mark.parametrize(
+    ("message", "code"),
+    [
+        ("ERROR: [youtube] abc: Private video. Sign in if you've been granted access",
+         ErrorCode.VIDEO_PRIVATE),
+        ("ERROR: [youtube] abc: Sign in to confirm you're not a bot", ErrorCode.FETCH_BLOCKED),
+        ("ERROR: [Instagram] abc: login required to access this content",
+         ErrorCode.FETCH_BLOCKED),
+        ("ERROR: [youtube] abc: Video unavailable", ErrorCode.VIDEO_UNAVAILABLE),
+    ],
+)
+def test_classify_fetch_errors(message: str, code: ErrorCode) -> None:
+    assert fetch.classify_error(message) == code
+
+
+def test_caption_from_info_dedupes_title_and_description() -> None:
+    info = {"title": "Math tips", "description": "Math tips"}
+    assert fetch.caption_from_info(info) == "Math tips"
+    assert fetch.caption_from_info({}) is None
+
+
+def test_choose_timestamps_spreads_and_pads() -> None:
+    # Few scene cuts: padded with evenly spaced moments, never closer than MIN_GAP_S.
+    picks = frames.choose_timestamps([2.0], 30.0)
+    assert len(picks) == frames.TARGET_FRAMES and 2.0 in picks
+    assert all(b - a >= frames.MIN_GAP_S for a, b in zip(picks, picks[1:], strict=False))
+    # Many cuts: capped and spread across the clip.
+    many = frames.choose_timestamps([i * 0.9 for i in range(1, 60)], 60.0)
+    assert len(many) <= frames.MAX_FRAMES and many[-1] > 30
+    assert frames.choose_timestamps([], 0) == []
+
+
+def test_thumbnail_prefers_detailed_frame_in_first_half() -> None:
+    picked = [frames.Frame("a.jpg", 1.0), frames.Frame("b.jpg", 4.0), frames.Frame("c.jpg", 9.0)]
+    sizes = {"a.jpg": 10, "b.jpg": 50, "c.jpg": 999}
+    assert frames.pick_thumbnail(picked, sizes, 10.0) == "b.jpg"
+
+
+async def test_cached_llm_spends_one_request_per_unique_input(tmp_path: Path) -> None:
+    good = load_fixture("llm_math_tutor.json")["ExtractedListing"][0]
+    inner = FixtureLLM({"ExtractedListing": [good]})  # a second real call would fail
+    cached = CachedLLM(inner, tmp_path)
+    first = await cached.generate_json(prompt="p", schema=ExtractedListing)
+    again = await cached.generate_json(prompt="p", schema=ExtractedListing)
+    assert first == again == good
+    assert [c.cached for c in cached.calls] == [False, True]
+    with pytest.raises(AssertionError):  # a different prompt is a cache miss
+        await cached.generate_json(prompt="other", schema=ExtractedListing)
+
+
+async def test_llm_reports_quota_when_every_model_is_capped() -> None:
+    async def call(model: str) -> str:
+        raise TransientLLMError(f"{model}: 429", retry_same_model=False)
+
+    with pytest.raises(PipelineError) as err:
+        await call_with_fallback(call, ["a", "b"], sleep=_no_sleep)
+    assert err.value.code == ErrorCode.LLM_QUOTA
+
+
+async def test_capped_models_are_skipped_on_later_calls() -> None:
+    calls: list[str] = []
+
+    async def call(model: str) -> str:
+        calls.append(model)
+        if model == "primary":
+            raise TransientLLMError("429 daily", retry_same_model=False)
+        return "{}"
+
+    await call_with_fallback(call, ["primary", "backup"], sleep=_no_sleep)
+    await call_with_fallback(call, ["primary", "backup"], sleep=_no_sleep)
+    assert calls == ["primary", "backup", "backup"]
+
+
+def test_fit_text_trims_at_word_boundary() -> None:
+    from pipeline.extract import fit_text
+
+    assert fit_text("short", 150) == "short"
+    trimmed = fit_text("word " * 40, 150)
+    assert len(trimmed) <= 150 and trimmed.endswith("word…")
+
+
+async def test_overlong_caption_is_trimmed_without_a_retry() -> None:
+    good = json.loads(load_fixture("llm_math_tutor.json")["ExtractedListing"][0])
+    good["caption"] = "x " * 100
+    llm = FixtureLLM({"ExtractedListing": [json.dumps(good)]})  # only one response recorded
+    result = await extract(llm, [], 10, None)
+    assert len(result.caption) <= 150 and len(llm.prompts) == 1

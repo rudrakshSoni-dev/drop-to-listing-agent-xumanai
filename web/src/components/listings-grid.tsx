@@ -1,11 +1,12 @@
 "use client";
 
-import { Clapperboard, Film, Plus, Search } from "lucide-react";
+import { Clapperboard, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
+import { ListingThumb } from "@/components/listing-thumb";
 import { PricePill } from "@/components/price-pill";
 import { SourceBadge } from "@/components/source-badge";
 import { Button } from "@/components/ui/button";
@@ -62,7 +63,7 @@ function ListingCard({ listing }: { listing: ListingSummary }) {
     >
       <Card className="group-hover:border-muted-foreground/40 h-full gap-0 overflow-hidden p-0 transition-colors duration-150">
         <div className="bg-muted relative flex aspect-[4/5] items-center justify-center">
-          <Film className="text-muted-foreground size-8" aria-hidden />
+          <ListingThumb id={listing.id} frame={listing.thumbnail_frame} />
           <SourceBadge type={listing.source.type} className="absolute top-3 left-3" />
           <span className="bg-background/80 absolute top-3 right-3 flex items-center gap-1.5 rounded-full px-2 py-1 text-xs backdrop-blur">
             <span className={cn("size-2 rounded-full", STATUS_DOT[status])} aria-hidden />

@@ -22,6 +22,8 @@ export interface DropInfo {
   width: number | null;
   height: number | null;
   transcript: Listing["transcript"] | null;
+  frames: { file: string; t: number }[];
+  thumbnail: string | null;
   created_at: string;
 }
 
@@ -97,6 +99,17 @@ export const api = {
     return ListingSchema.parse(
       await request(`/api/listings/${id}`, { method: "PATCH", ...json(patch) }),
     );
+  },
+  suggestPrice(params: {
+    category: Listing["category"];
+    group: Listing["format"]["group"];
+    mode: Listing["format"]["mode"];
+    duration_min: number;
+  }): Promise<Listing["session"]["price_band"]> {
+    const query = new URLSearchParams(
+      Object.entries(params).map(([k, v]) => [k, String(v)]),
+    ).toString();
+    return request(`/api/listings/price-suggestion?${query}`);
   },
   eventsUrl(id: string): string {
     return apiUrl(`/api/drops/${id}/events`);

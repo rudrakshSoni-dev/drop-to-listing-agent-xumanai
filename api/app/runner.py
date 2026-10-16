@@ -34,6 +34,17 @@ async def _persist_and_publish(drop_id: str, event: dict[str, Any]) -> None:
             if drop:
                 drop.duration_s = event["duration_s"]
                 drop.width, drop.height = event["width"], event["height"]
+                drop.media_file = event["file"]
+                drop.caption = drop.caption or event.get("caption")
+                s.add(drop)
+                s.commit()
+        event = {**event, "media_url": f"/api/media/{drop_id}/{event['file']}"}
+    elif event["kind"] == "frames":
+        with db.session() as s:
+            drop = s.get(db.Drop, drop_id)
+            if drop:
+                drop.frames_json = json.dumps(event["frames"])
+                drop.thumbnail = event["thumbnail"]
                 s.add(drop)
                 s.commit()
     elif event["kind"] == "transcript":
@@ -58,12 +69,12 @@ def _finish(drop_id: str, status: str, error_code: str | None = None) -> None:
 async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
     with db.session() as s:
         drop = s.get(db.Drop, drop_id)
-        if drop is None or drop.media_file is None:
+        if drop is None or (drop.media_file is None and drop.source_url is None):
             return
         work_dir = settings.media_dir / drop_id
         drop_input = DropInput(
             drop_id=drop_id,
-            video_path=work_dir / drop.media_file,
+            video_path=work_dir / drop.media_file if drop.media_file else None,
             work_dir=work_dir,
             source_type=cast(SourceType, drop.source_type),
             source_url=drop.source_url,
@@ -72,6 +83,7 @@ async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
     config = RunConfig(
         max_video_seconds=settings.max_video_seconds,
         transcribe_backend=settings.transcribe_backend,
+        whisper_model=settings.whisper_model,
     )
 
     current_stage: str | None = None

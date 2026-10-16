@@ -10,6 +10,9 @@ import pytest
 # Must be set before app.config is imported anywhere.
 os.environ["DATA_DIR"] = tempfile.mkdtemp(prefix="drop2list-test-")
 os.environ["GEMINI_API_KEY"] = ""
+# Tests replay recorded Gemini transcripts instead of loading a whisper model.
+os.environ["TRANSCRIBE_BACKEND"] = "gemini"
+os.environ["LLM_CACHE"] = "0"
 
 import httpx  # noqa: E402
 from sse_starlette.sse import AppStatus  # noqa: E402

@@ -5,7 +5,7 @@ import { CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { WEEKDAYS } from "@/lib/format";
+import { durationLabel, WEEKDAYS } from "@/lib/format";
 import type { AvailabilitySlot } from "@/lib/schema";
 
 const TIMES = Array.from({ length: 14 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`);
@@ -88,7 +88,7 @@ export function AvailabilityPicker({
         </div>
         <div className="space-y-2">
           <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            Start times · {durationMin} min each
+            Start times · {durationLabel(durationMin)} each
           </p>
           <ToggleGroup
             type="multiple"

@@ -1,6 +1,6 @@
 "use client";
 
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 
 import { SourceBadge } from "@/components/source-badge";
 import { Card } from "@/components/ui/card";
@@ -13,22 +13,28 @@ export function VideoPanel({
   videoRef,
   src,
   captionsSrc,
+  poster,
   width,
   height,
   sourceType,
   durationS,
   onTimeUpdate,
   className,
+  children,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   src: string | null;
   captionsSrc?: string;
+  /** Shown before playback; many clips open on a black frame. */
+  poster?: string | null;
   width?: number | null;
   height?: number | null;
   sourceType: SourceType;
   durationS?: number | null;
   onTimeUpdate?: (seconds: number) => void;
   className?: string;
+  /** Rendered under the video, e.g. the FrameStrip. */
+  children?: ReactNode;
 }) {
   const portrait = width && height ? height >= width : true;
   const aspect = width && height ? `${width} / ${height}` : portrait ? "9 / 16" : "16 / 9";
@@ -49,6 +55,7 @@ export function VideoPanel({
             controls
             playsInline
             preload="metadata"
+            poster={poster ?? undefined}
             crossOrigin="anonymous"
             onTimeUpdate={(e) => onTimeUpdate?.(e.currentTarget.currentTime)}
             className="size-full bg-black object-contain"
@@ -61,6 +68,7 @@ export function VideoPanel({
           <Skeleton className="size-full rounded-lg" />
         )}
       </div>
+      {children}
       <div className="flex items-center justify-between">
         <SourceBadge type={sourceType} />
         {durationS ? (

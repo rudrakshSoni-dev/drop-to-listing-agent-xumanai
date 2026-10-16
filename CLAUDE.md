@@ -56,15 +56,16 @@ Supporting endpoints the UI also uses:
 - `POST /api/drops/{id}/retry` → re-run a failed drop on its saved media.
 - `GET /api/drops/{id}/captions.vtt` → WebVTT captions built from the transcript.
 - `GET /api/listings` → all listings (transcript omitted).
+- `GET /api/listings/price-suggestion?category&group&mode&duration_min` → the static `pricing.py` band, so the editor can refresh the suggestion live.
 - `/api/media/{drop_id}/{file}` → static media (source video, frames).
 
-SSE events are JSON objects with a `kind`: `stage` (`stage`, `detail`), `detail`, `media`, `transcript` (`lines`), `done` (`listing_id`), or `error` (`code`, `stage`). Each carries `seq` and `t` (ms since start). A listing shares its drop's id.
+SSE events are JSON objects with a `kind`: `stage` (`stage`, `detail`), `detail`, `media` (`duration_s`, `width`, `height`, `media_url`, `caption`), `transcript` (`lines`), `frames` (`frames: [{file, t}]`, `thumbnail`), `done` (`listing_id`), or `error` (`code`, `stage`). Each carries `seq` and `t` (ms since start). A listing shares its drop's id.
 
 ### Pipeline stages (api/pipeline/)
 | Stage | Module | Notes |
 |---|---|---|
 | Fetch | `fetch.py` | `yt-dlp` for links, max 3 min, mp4. Reject private or unavailable videos with a clear error code |
-| Transcribe | `transcribe.py` | Gemini audio input by default; `faster-whisper` as a local fallback behind `TRANSCRIBE_BACKEND` |
+| Transcribe | `transcribe.py` | Local `faster-whisper` (`small.en` + a vocabulary hint) by default; Gemini audio behind `TRANSCRIBE_BACKEND=gemini` |
 | Frames | `frames.py` | `ffmpeg` scene-change detection, keep 4–6 frames, pick a thumbnail |
 | Extract | `extract.py` | One LLM call with transcript + frames + caption, returning **structured output validated by Pydantic** against the schema. Retry once on validation failure with the error fed back |
 | Guardrails | `guardrails.py` | Rule checks plus one LLM classification pass (see §5) |
@@ -114,19 +115,29 @@ Rules:
 ## 4. Environment
 
 ```
-# api/.env
+# api/.env (see api/.env.example for comments)
 GEMINI_API_KEY=
-LLM_MODEL=            # set to a current Gemini model; do not hardcode in code
-LLM_FALLBACK_MODEL=   # optional; tried after LLM_MODEL keeps returning 503/429
+LLM_MODELS=           # ordered comma list; later models take over on 503 / daily-quota 429
 LLM_THINKING_BUDGET=0 # 0 = thinking off (fastest); token count; or "default"
-TRANSCRIBE_BACKEND=gemini   # gemini | whisper
+LLM_CACHE=1           # disk cache of LLM responses (data/llm_cache)
+TRANSCRIBE_BACKEND=whisper  # whisper (local, default) | gemini
+WHISPER_MODEL=small.en
+DEMO_DROPS_PER_IP=0   # per-visitor daily cap on new drops for a public demo; 0 = off
 MAX_VIDEO_SECONDS=180
 
 # web/.env.local
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Read the model name from env everywhere. Never commit keys. `.env.example` files must exist in both apps.
+Read the model names from env everywhere. Never commit keys. `.env.example` files must exist in both apps.
+
+### Free-tier budget
+The demo runs on Gemini's free tier (~20 requests/day **per model**). Design rule: **one Gemini request per new video.**
+- Transcription is local (`faster-whisper`), not Gemini.
+- Guardrails' LLM classification shares the extract call (one structured response) instead of a separate pass.
+- `CachedLLM` keys responses on prompt + schema + media bytes, so retries, repeated links and eval reruns cost nothing.
+- `LLM_MODELS` rotates across models; a model that hits its daily cap is skipped for an hour. When all are capped, drops fail with `LLM_QUOTA` and friendly copy.
+- Over-length text from the model is trimmed locally (word boundary + "…") instead of spending a retry.
 
 System deps: `ffmpeg`, `yt-dlp` (pinned in `api/requirements.txt` as a Python package).
 

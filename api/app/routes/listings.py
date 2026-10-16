@@ -1,14 +1,14 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import ValidationError
 from sqlmodel import col, select
 
 from app import db
 from app.errors import ApiError
-from app.schema_gen import Listing
-from pipeline import confidence
+from app.schema_gen import Listing, PriceBand
+from pipeline import confidence, pricing
 
 router = APIRouter(prefix="/api/listings", tags=["listings"])
 
@@ -36,6 +36,20 @@ def _load(listing_id: str) -> Listing:
     if row is None:
         raise ApiError(404, "NOT_FOUND", "No listing with that id.")
     return Listing.model_validate_json(row.data)
+
+
+@router.get("/price-suggestion")
+async def price_suggestion(
+    category: str, group: str, mode: str, duration_min: int = Query(ge=15, le=240)
+) -> PriceBand:
+    """The same static heuristic the pipeline uses, for live updates in the editor."""
+    if (
+        category not in pricing.BASE_BANDS
+        or group not in pricing.GROUP_FACTOR
+        or mode not in pricing.MODE_FACTOR
+    ):
+        raise ApiError(422, "PRICE_INPUT_INVALID", "Unknown category, group or mode.")
+    return pricing.suggest_price_band(category, group, mode, duration_min)
 
 
 @router.get("")

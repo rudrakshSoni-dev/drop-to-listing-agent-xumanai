@@ -1,5 +1,6 @@
 """Transcript (+ caption) → structured listing fields, validated by Pydantic."""
 
+import json
 from datetime import datetime
 from typing import Literal
 
@@ -16,7 +17,7 @@ from app.schema_gen import (
 )
 from pipeline import confidence, prompts
 from pipeline.errors import ErrorCode, PipelineError
-from pipeline.llm import LLM
+from pipeline.llm import LLM, Media
 from pipeline.pricing import suggest_price_band
 
 Category = Literal[
@@ -88,30 +89,55 @@ def format_transcript(lines: list[TranscriptLine]) -> str:
     return "\n".join(f"[{line.start:06.1f}] {line.text}" for line in lines)
 
 
+TEXT_LIMITS = {"title": 60, "summary": 280, "description": 1200, "caption": 150}
+
+
+def fit_text(text: str, limit: int) -> str:
+    """Trim at a word boundary with an ellipsis. Cheaper than a retry on the free tier."""
+    if len(text) <= limit:
+        return text
+    cut = text[: limit - 1].rsplit(" ", 1)[0].rstrip(" ,;:.-–—")
+    return cut + "…"
+
+
 def _parse(raw: str) -> ExtractedListing:
-    extracted = ExtractedListing.model_validate_json(raw)
+    data = json.loads(raw)
+    # Models (especially lite ones) overshoot length limits; fix those locally and
+    # keep the retry for real schema problems.
+    if isinstance(data, dict):
+        for key, limit in TEXT_LIMITS.items():
+            if isinstance(data.get(key), str):
+                data[key] = fit_text(data[key], limit)
+    extracted = ExtractedListing.model_validate(data)
     if extracted.age_min > extracted.age_max:
         raise ValueError("age_min must be <= age_max")
     return extracted
 
 
 async def extract(
-    llm: LLM, transcript: list[TranscriptLine], duration_s: float, caption: str | None
+    llm: LLM,
+    transcript: list[TranscriptLine],
+    duration_s: float,
+    caption: str | None,
+    frames: list[Media] | None = None,
 ) -> ExtractedListing:
     prompt = prompts.render(
-        "extract_v2",
+        "extract_v3",
         transcript=format_transcript(transcript),
         duration=f"{duration_s:.0f}",
         caption=caption or "(none)",
+        frames=f"{len(frames)} images attached, in time order" if frames else "(none)",
     )
-    raw = await llm.generate_json(prompt=prompt, schema=ExtractedListing)
+    raw = await llm.generate_json(prompt=prompt, schema=ExtractedListing, media=frames)
     try:
         return _parse(raw)
-    except (ValidationError, ValueError) as first_error:
+    except (ValidationError, ValueError) as first_error:  # JSONDecodeError is a ValueError
         retry_prompt = prompts.render(
             "extract_retry_v1", original=prompt, previous=raw, errors=str(first_error)
         )
-        raw = await llm.generate_json(prompt=retry_prompt, schema=ExtractedListing)
+        raw = await llm.generate_json(
+            prompt=retry_prompt, schema=ExtractedListing, media=frames
+        )
         try:
             return _parse(raw)
         except (ValidationError, ValueError) as exc:
@@ -125,9 +151,12 @@ def build_listing(
     source: Source,
     transcript: list[TranscriptLine],
     created_at: datetime,
+    caption: str | None = None,
+    thumbnail_frame: str | None = None,
 ) -> Listing:
     c, ev = extracted.confidence, extracted.evidence
-    heard = " ".join(line.text for line in transcript)
+    # Evidence may come from the spoken transcript or the post's own caption.
+    heard = " ".join([*(line.text for line in transcript), caption or ""])
     duration = min(max(extracted.duration_min, SESSION_MIN), SESSION_MAX)
     duration_score = confidence.ground(c.duration, ev.duration, heard)
     if duration != extracted.duration_min:
@@ -173,7 +202,7 @@ def build_listing(
             skills=extracted.skills,
             tags=extracted.tags,
             caption=extracted.caption,
-            thumbnail_frame=None,
+            thumbnail_frame=thumbnail_frame,
             availability=None,
             confidence=scores,
             missing_fields=confidence.missing_fields(scores, availability=None),

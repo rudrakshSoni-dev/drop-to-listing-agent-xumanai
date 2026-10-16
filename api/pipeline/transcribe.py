@@ -1,8 +1,11 @@
-"""Speech → timestamped transcript. Gemini audio by default; faster-whisper locally."""
+"""Speech → timestamped transcript. Local faster-whisper by default; Gemini audio opt-in."""
 
 import subprocess
+import threading
 from pathlib import Path
+from typing import Any
 
+import numpy as np
 from pydantic import BaseModel, ValidationError
 
 from app.schema_gen import TranscriptLine
@@ -72,15 +75,51 @@ async def transcribe_gemini(audio: Path, duration_s: float, llm: LLM) -> list[Tr
     return clean_segments(result.segments, duration_s)
 
 
-def transcribe_whisper(audio: Path, duration_s: float) -> list[TranscriptLine]:
-    try:
-        from faster_whisper import WhisperModel  # type: ignore[import-not-found]
-    except ImportError as exc:
-        raise PipelineError(
-            ErrorCode.TRANSCRIBE_FAIL,
-            "TRANSCRIBE_BACKEND=whisper needs `pip install faster-whisper`",
-        ) from exc
-    model = WhisperModel("small", device="cpu", compute_type="int8")
-    segments, _ = model.transcribe(str(audio), vad_filter=True)
+_whisper_models: dict[str, Any] = {}
+_whisper_lock = threading.Lock()
+
+
+def _whisper(model_name: str) -> Any:
+    """Load once per process; the first call downloads the weights (~250 MB for small.en)."""
+    with _whisper_lock:
+        if model_name not in _whisper_models:
+            try:
+                from faster_whisper import WhisperModel  # type: ignore[import-untyped]
+            except ImportError as exc:
+                raise PipelineError(
+                    ErrorCode.TRANSCRIBE_FAIL,
+                    "TRANSCRIBE_BACKEND=whisper needs `pip install faster-whisper`",
+                ) from exc
+            _whisper_models[model_name] = WhisperModel(
+                model_name, device="cpu", compute_type="int8"
+            )
+        return _whisper_models[model_name]
+
+
+def preload_whisper(model_name: str) -> None:
+    """Warm the model at startup so the first drop doesn't pay the load (or download)."""
+    _whisper(model_name)
+
+
+def decode_pcm(audio: Path) -> "np.ndarray[Any, np.dtype[np.float32]]":
+    """16 kHz mono float32 via ffmpeg (avoids faster-whisper's PyAV decoder)."""
+    cmd = [
+        "ffmpeg", "-v", "error", "-i", str(audio),
+        "-f", "s16le", "-ac", "1", "-ar", "16000", "-",
+    ]  # fmt: skip
+    result = subprocess.run(cmd, capture_output=True, timeout=120)
+    if result.returncode != 0:
+        raise PipelineError(ErrorCode.TRANSCRIBE_FAIL, result.stderr.decode()[:200])
+    return np.frombuffer(result.stdout, np.int16).astype(np.float32) / 32768.0
+
+
+def transcribe_whisper(
+    audio: Path, duration_s: float, model_name: str = "small.en"
+) -> list[TranscriptLine]:
+    """Local, free, and no quota. The hint primes vocabulary like "one-on-one"."""
+    model = _whisper(model_name)
+    segments, _ = model.transcribe(
+        decode_pcm(audio), vad_filter=True, initial_prompt=prompts.render("whisper_hint_v1")
+    )
     parsed = [_Segment(start=s.start, end=s.end, text=s.text) for s in segments]
     return clean_segments(parsed, duration_s)

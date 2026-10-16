@@ -15,6 +15,7 @@ export const listingFormSchema = ListingSchema.pick({
   skills: true,
   tags: true,
   caption: true,
+  thumbnail_frame: true,
   availability: true,
 })
   .extend({
@@ -46,6 +47,7 @@ export function toFormValues(listing: Listing): ListingFormValues {
     skills: listing.skills,
     tags: listing.tags,
     caption: listing.caption,
+    thumbnail_frame: listing.thumbnail_frame,
     availability: listing.availability,
   };
 }

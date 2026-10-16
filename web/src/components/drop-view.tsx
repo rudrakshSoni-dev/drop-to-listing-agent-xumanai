@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { EditorSkeleton } from "@/components/editor-skeleton";
+import { FrameStrip } from "@/components/frame-strip";
 import { ErrorState } from "@/components/error-state";
 import { ListingEditor } from "@/components/listing-editor";
 import { PipelineStepper } from "@/components/pipeline-stepper";
@@ -26,6 +27,12 @@ export function DropView({ id }: { id: string }) {
   const listing = useListing(id, events.status === "done");
   const videoRef = useRef<HTMLVideoElement>(null);
   const toasted = useRef(false);
+
+  // The drop was fetched when the page opened; frames and media arrived since.
+  const refetchDrop = drop.refetch;
+  useEffect(() => {
+    if (events.status === "done") void refetchDrop();
+  }, [events.status, refetchDrop]);
 
   useEffect(() => {
     if (events.status === "done" && !events.replayed && !toasted.current) {
@@ -56,6 +63,11 @@ export function DropView({ id }: { id: string }) {
   }
 
   const ready = events.status === "done" && listing.data;
+  // Link drops have no media until the fetch stage finishes; the SSE event brings it.
+  const mediaUrl = events.media?.media_url ?? drop.data?.media_url;
+  const width = events.media?.width ?? drop.data?.width;
+  const height = events.media?.height ?? drop.data?.height;
+  const portrait = width && height ? height >= width : true;
   const fade = reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 };
 
   return (
@@ -85,12 +97,19 @@ export function DropView({ id }: { id: string }) {
           <div className="min-w-0 space-y-4">
             <VideoPanel
               videoRef={videoRef}
-              src={drop.data?.media_url ? apiUrl(drop.data.media_url) : null}
-              width={events.media?.width ?? drop.data?.width}
-              height={events.media?.height ?? drop.data?.height}
+              src={mediaUrl ? apiUrl(mediaUrl) : null}
+              width={width}
+              height={height}
               sourceType={drop.data?.source.type ?? "upload"}
               durationS={events.media?.duration_s ?? drop.data?.duration_s}
-            />
+            >
+              <FrameStrip
+                dropId={id}
+                frames={events.frames}
+                loading={events.status !== "error"}
+                portrait={portrait}
+              />
+            </VideoPanel>
             <Card className="gap-3 p-4">
               <h2 className="text-lg font-semibold">Transcript</h2>
               <TranscriptList

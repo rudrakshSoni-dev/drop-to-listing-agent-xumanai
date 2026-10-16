@@ -1,8 +1,9 @@
 "use client";
 
-import { Film, MapPin, ShieldCheck, Shuffle, Video } from "lucide-react";
+import { MapPin, ShieldCheck, Shuffle, Video } from "lucide-react";
 import { useWatch } from "react-hook-form";
 
+import { ListingThumb } from "@/components/listing-thumb";
 import { PricePill } from "@/components/price-pill";
 import { SourceBadge } from "@/components/source-badge";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ function PreviewCard({ listing }: { listing: Listing }) {
   return (
     <Card className="gap-0 overflow-hidden p-0">
       <div className="bg-muted relative flex aspect-[4/5] items-center justify-center">
-        <Film className="text-muted-foreground size-8" aria-hidden />
+        <ListingThumb id={listing.id} frame={values.thumbnail_frame} />
         <SourceBadge type={listing.source.type} className="absolute top-3 left-3" />
       </div>
       <div className="space-y-3 p-4">

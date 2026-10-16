@@ -12,6 +12,7 @@ import { ListingForm, type FieldMeta } from "@/components/listing-form";
 import { ListingSidePanel, PreviewCard, SafetySummary } from "@/components/listing-side-panel";
 import { StatusBadge } from "@/components/status-badge";
 import { TranscriptList } from "@/components/transcript-list";
+import { FrameStrip } from "@/components/frame-strip";
 import { VideoPanel } from "@/components/video-panel";
 import {
   Accordion,
@@ -114,6 +115,7 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
   });
   const { dirtyFields, isDirty } = form.formState;
   const availability = useWatch({ control: form.control, name: "availability" });
+  const thumbnail = useWatch({ control: form.control, name: "thumbnail_frame" });
 
   const isEdited = (key: string) => savedEdits.current.has(key) || anyDirty(at(dirtyFields, key));
   const meta: FieldMeta = { confidence: listing.confidence, isEdited };
@@ -171,12 +173,21 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
       videoRef={videoRef}
       src={drop?.media_url ? apiUrl(drop.media_url) : null}
       captionsSrc={api.captionsUrl(listing.id)}
+      poster={thumbnail ? apiUrl(`/api/media/${listing.id}/${thumbnail}`) : null}
       width={drop?.width}
       height={drop?.height}
       sourceType={listing.source.type}
       durationS={listing.source.duration_s}
       onTimeUpdate={setCurrentTime}
-    />
+    >
+      <FrameStrip
+        dropId={listing.id}
+        frames={drop?.frames ?? null}
+        selected={thumbnail}
+        onSelect={(file) => form.setValue("thumbnail_frame", file, { shouldDirty: true })}
+        portrait={drop?.width && drop.height ? drop.height >= drop.width : true}
+      />
+    </VideoPanel>
   );
   const transcript = (
     <TranscriptList
