@@ -1,0 +1,9 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+sqlmodel==0.0.24
+pydantic==2.11.4
+python-multipart==0.0.20
+python-dotenv==1.1.0
+sse-starlette==2.3.5
+google-genai==1.16.1
+yt-dlp==2025.5.22

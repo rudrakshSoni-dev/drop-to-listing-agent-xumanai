@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://drop2list.dev/listing.schema.json",
+  "title": "Listing",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "source",
+    "title",
+    "summary",
+    "description",
+    "category",
+    "subcategory",
+    "age_range",
+    "format",
+    "session",
+    "skills",
+    "tags",
+    "caption",
+    "thumbnail_frame",
+    "availability",
+    "confidence",
+    "missing_fields",
+    "guardrails",
+    "transcript",
+    "created_at"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "source": { "$ref": "#/$defs/Source" },
+    "title": { "type": "string", "maxLength": 60 },
+    "summary": { "type": "string", "maxLength": 280 },
+    "description": { "type": "string", "maxLength": 1200 },
+    "category": { "$ref": "#/$defs/Category" },
+    "subcategory": { "type": ["string", "null"] },
+    "age_range": { "$ref": "#/$defs/AgeRange" },
+    "format": { "$ref": "#/$defs/Format" },
+    "session": { "$ref": "#/$defs/Session" },
+    "skills": { "type": "array", "items": { "type": "string" } },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "caption": { "type": "string", "maxLength": 150 },
+    "thumbnail_frame": { "type": ["string", "null"] },
+    "availability": {
+      "anyOf": [
+        { "type": "array", "items": { "$ref": "#/$defs/AvailabilitySlot" } },
+        { "type": "null" }
+      ]
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+    },
+    "missing_fields": { "type": "array", "items": { "type": "string" } },
+    "guardrails": { "$ref": "#/$defs/Guardrails" },
+    "transcript": { "type": "array", "items": { "$ref": "#/$defs/TranscriptLine" } },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "SourceType": {
+      "type": "string",
+      "enum": ["instagram", "tiktok", "youtube", "upload"]
+    },
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "url", "duration_s"],
+      "properties": {
+        "type": { "$ref": "#/$defs/SourceType" },
+        "url": { "type": ["string", "null"] },
+        "duration_s": { "type": "number", "minimum": 0 }
+      }
+    },
+    "Category": {
+      "type": "string",
+      "enum": [
+        "academic_tutoring",
+        "homework_support",
+        "stem_coding_robotics",
+        "arts_music",
+        "communication_public_speaking",
+        "sports_fitness_wellness",
+        "leadership_life_skills",
+        "hobbies_enrichment",
+        "mentoring"
+      ]
+    },
+    "AgeRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 18 },
+        "max": { "type": "integer", "minimum": 0, "maximum": 18 }
+      }
+    },
+    "Group": { "type": "string", "enum": ["one_on_one", "small_group"] },
+    "Mode": { "type": "string", "enum": ["virtual", "in_person", "hybrid"] },
+    "Format": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "mode", "max_group_size"],
+      "properties": {
+        "group": { "$ref": "#/$defs/Group" },
+        "mode": { "$ref": "#/$defs/Mode" },
+        "max_group_size": { "type": ["integer", "null"], "minimum": 2 }
+      }
+    },
+    "PriceBand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max", "currency"],
+      "properties": {
+        "min": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      }
+    },
+    "Session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["duration_min", "price_band"],
+      "properties": {
+        "duration_min": { "type": "integer", "minimum": 15, "maximum": 240 },
+        "price_band": { "$ref": "#/$defs/PriceBand" }
+      }
+    },
+    "AvailabilitySlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weekday", "start", "end"],
+      "properties": {
+        "weekday": { "type": "integer", "minimum": 0, "maximum": 6 },
+        "start": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+        "end": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+      }
+    },
+    "GuardrailStatus": { "type": "string", "enum": ["pass", "warn", "block"] },
+    "Severity": { "type": "string", "enum": ["low", "med", "high"] },
+    "GuardrailFlag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "evidence", "explanation"],
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "$ref": "#/$defs/Severity" },
+        "evidence": { "type": "string" },
+        "explanation": { "type": "string" },
+        "timestamp_s": { "type": ["number", "null"] }
+      }
+    },
+    "Guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "flags"],
+      "properties": {
+        "status": { "$ref": "#/$defs/GuardrailStatus" },
+        "flags": { "type": "array", "items": { "$ref": "#/$defs/GuardrailFlag" } }
+      }
+    },
+    "TranscriptLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "text"],
+      "properties": {
+        "start": { "type": "number", "minimum": 0 },
+        "end": { "type": "number", "minimum": 0 },
+        "text": { "type": "string" }
+      }
+    }
+  }
+}
