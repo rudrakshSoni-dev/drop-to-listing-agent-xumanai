@@ -201,3 +201,17 @@ async def test_booking_validates_slots_and_blocks(
     )
     assert blocked.status_code == 409
     assert blocked.json()["error"]["code"] == "LISTING_BLOCKED"
+
+
+async def test_evals_endpoint_serves_results_or_a_typed_404(
+    client: httpx.AsyncClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.routes import evals
+
+    monkeypatch.setattr(evals, "settings", replace(settings, evals_dir=tmp_path))
+    missing = await client.get("/api/evals")
+    assert missing.status_code == 404 and missing.json()["error"]["code"] == "EVALS_NOT_RUN"
+    (tmp_path / "results.json").write_text('{"meta": {}, "metrics": {}, "rows": []}')
+    (tmp_path / "notes.md").write_text("- Fails on silent videos.")
+    ok = (await client.get("/api/evals")).json()
+    assert ok["results"]["rows"] == [] and ok["notes_md"].startswith("- Fails")

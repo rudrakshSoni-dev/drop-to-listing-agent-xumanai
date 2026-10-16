@@ -55,6 +55,9 @@ class Settings:
         default_factory=lambda: _env("CORS_ORIGINS", "http://localhost:3000").split(",")
     )
     data_dir: Path = field(default_factory=lambda: Path(_env("DATA_DIR") or API_DIR / "data"))
+    evals_dir: Path = field(
+        default_factory=lambda: Path(_env("EVALS_DIR") or API_DIR.parent / "evals")
+    )
 
     @property
     def media_dir(self) -> Path:

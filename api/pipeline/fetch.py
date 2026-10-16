@@ -77,6 +77,9 @@ def fetch(url: str, dest_dir: Path, max_seconds: int) -> Fetched:
         "merge_output_format": "mp4",
         "outtmpl": str(dest_dir / "source.%(ext)s"),
         "socket_timeout": 20,
+        # YouTube now needs a JS challenge solver (yt-dlp-ejs) run by a JS runtime.
+        # Node ships with the web toolchain; Deno is yt-dlp's default if present.
+        "js_runtimes": {"deno": {}, "node": {}},
         "retries": 2,
     }
     try:

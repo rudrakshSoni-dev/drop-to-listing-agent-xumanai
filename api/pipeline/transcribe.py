@@ -1,5 +1,6 @@
 """Speech → timestamped transcript. Local faster-whisper by default; Gemini audio opt-in."""
 
+import re
 import subprocess
 import threading
 from pathlib import Path
@@ -118,8 +119,24 @@ def transcribe_whisper(
 ) -> list[TranscriptLine]:
     """Local, free, and no quota. The hint primes vocabulary like "one-on-one"."""
     model = _whisper(model_name)
-    segments, _ = model.transcribe(
-        decode_pcm(audio), vad_filter=True, initial_prompt=prompts.render("whisper_hint_v1")
-    )
+    hint = prompts.render("whisper_hint_v1")
+    segments, _ = model.transcribe(decode_pcm(audio), vad_filter=True, initial_prompt=hint)
     parsed = [_Segment(start=s.start, end=s.end, text=s.text) for s in segments]
-    return clean_segments(parsed, duration_s)
+    return clean_segments(drop_hint_echoes(parsed, hint), duration_s)
+
+
+def _words(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9']+", text.lower())
+
+
+def drop_hint_echoes(segments: list[_Segment], hint: str) -> list[_Segment]:
+    """On music-only audio Whisper can "hear" its own prompt. Drop segments that are
+    mostly words from the hint, so they never reach the model as fake speech."""
+    hint_words = set(_words(hint))
+    kept = []
+    for seg in segments:
+        words = _words(seg.text)
+        if words and sum(w in hint_words for w in words) / len(words) >= 0.8 and len(words) >= 4:
+            continue
+        kept.append(seg)
+    return kept

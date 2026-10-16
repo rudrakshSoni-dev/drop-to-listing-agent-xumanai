@@ -282,3 +282,12 @@ async def test_overlong_caption_is_trimmed_without_a_retry() -> None:
     llm = FixtureLLM({"ExtractedListing": [json.dumps(good)]})  # only one response recorded
     result = await extract(llm, [], 10, None)
     assert len(result.caption) <= 150 and len(llm.prompts) == 1
+
+
+def test_whisper_prompt_echo_is_dropped() -> None:
+    from pipeline.transcribe import drop_hint_echoes
+
+    hint = "A tutor, coach or mentor describes their sessions for kids and teens."
+    echo = _Segment(start=0, end=5, text=" A tutor, coach or mentor describes their sessions.")
+    real = _Segment(start=5, end=9, text="I coach cricket for kids on weekends.")
+    assert drop_hint_echoes([echo, real], hint) == [real]

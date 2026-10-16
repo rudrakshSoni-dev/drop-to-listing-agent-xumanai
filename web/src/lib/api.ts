@@ -1,3 +1,4 @@
+import type { EvalsResponse } from "@/lib/evals";
 import { ListingSchema, type Listing } from "@/lib/schema";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -121,6 +122,9 @@ export const api = {
   },
   book(id: string, slot: { date: string; start: string }): Promise<BookingConfirmation> {
     return request(`/api/listings/${id}/book`, { method: "POST", ...json(slot) });
+  },
+  getEvals(): Promise<EvalsResponse> {
+    return request("/api/evals");
   },
   eventsUrl(id: string): string {
     return apiUrl(`/api/drops/${id}/events`);

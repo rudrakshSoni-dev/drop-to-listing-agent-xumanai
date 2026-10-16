@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app import db
 from app.config import settings
 from app.errors import ApiError, api_error_handler
-from app.routes import drops, listings
+from app.routes import drops, evals, listings
 from pipeline import transcribe
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +45,7 @@ app.add_middleware(
 app.add_exception_handler(ApiError, api_error_handler)
 app.include_router(drops.router)
 app.include_router(listings.router)
+app.include_router(evals.router)
 
 settings.media_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/api/media", StaticFiles(directory=settings.media_dir), name="media")

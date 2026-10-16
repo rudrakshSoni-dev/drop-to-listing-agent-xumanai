@@ -25,8 +25,8 @@ schema:
 	cd web && node scripts/gen-schema.mjs && pnpm exec prettier --write src/lib/schema.ts --log-level warn
 
 evals:
-	cd api && .venv/bin/python ../evals/run_evals.py
+	cd api && .venv/bin/python ../evals/run_evals.py $(ARGS)
 
 test:
-	cd api && .venv/bin/ruff check . && .venv/bin/mypy --strict pipeline && .venv/bin/pytest -q
+	cd api && .venv/bin/ruff check . ../evals && .venv/bin/mypy --strict pipeline ../evals/metrics.py && .venv/bin/pytest -q
 	cd web && pnpm typecheck && pnpm lint && pnpm test
