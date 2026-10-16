@@ -15,7 +15,7 @@ from app.errors import ApiError
 from app.events import TERMINAL, bus
 from app.schema_gen import TranscriptLine
 from pipeline.errors import ErrorCode
-from pipeline.llm import LLM, GeminiLLM
+from pipeline.llm import LLM, FixtureLLM, GeminiLLM
 
 router = APIRouter(prefix="/api/drops", tags=["drops"])
 
@@ -23,6 +23,9 @@ ALLOWED_EXTENSIONS = {".mp4", ".mov", ".m4v", ".webm"}
 
 
 def get_llm_factory() -> Callable[[], LLM]:
+    if settings.llm_fixture:
+        responses = json.loads(Path(settings.llm_fixture).read_text())
+        return lambda: FixtureLLM(responses, cycle=True)
     return lambda: GeminiLLM(settings.gemini_api_key, settings.llm_model)
 
 

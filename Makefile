@@ -22,7 +22,7 @@ schema:
 		--use-standard-collections --use-union-operator --target-python-version 3.11 \
 		--field-constraints --enum-field-as-literal all --collapse-root-models --disable-timestamp \
 		--custom-file-header "# GENERATED from $(SCHEMA) by \`make schema\`. Do not edit."
-	cd web && node scripts/gen-schema.mjs
+	cd web && node scripts/gen-schema.mjs && pnpm exec prettier --write src/lib/schema.ts --log-level warn
 
 evals:
 	cd api && .venv/bin/python ../evals/run_evals.py

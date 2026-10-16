@@ -28,7 +28,7 @@ npm i @tanstack/react-query react-hook-form zod @hookform/resolvers \
   lucide-react framer-motion clsx tailwind-merge date-fns
 ```
 
-- **Icons:** `lucide-react` only.
+- **Icons:** `lucide-react` only. Lucide v1 dropped brand icons, so sources use generic glyphs (Instagram `Camera`, TikTok `Music2`, YouTube `TvMinimalPlay`) and the GitHub button uses `FolderGit2`.
 - **Animation:** `framer-motion` only for the swipe card and stage transitions. Everything else uses Tailwind transitions.
 - **Toasts:** `sonner` (shadcn wrapper). Mount `<Toaster richColors position="bottom-right" />` once in the root layout.
 
@@ -99,7 +99,7 @@ Dark is the default theme. Use `next-themes` with `defaultTheme="dark"`; light m
 }
 ```
 
-Register `success`, `warning`, and `info` in `tailwind.config.ts` under `theme.extend.colors` so `bg-success`, `text-warning`, and similar classes work.
+Register `success`, `warning`, and `info` so `bg-success`, `text-warning`, and similar classes work. With Tailwind v4 there is no `tailwind.config.ts`: tokens stay as HSL triplets on `:root`/`.dark` and are mapped to `--color-*` inside `@theme inline` in `globals.css` (`bg-brand-gradient` / `text-brand-gradient` are `@utility` classes there too). Active tabs and selected toggle-group items get their primary tint from unlayered rules in `globals.css`, so `components/ui/` stays untouched.
 
 **Usage rules**
 - `primary` violet: primary buttons, focus rings, active tab, the progress fill. Nothing decorative.
@@ -252,13 +252,13 @@ On submit, POST, then `router.push('/drops/' + id)`.
    - Description: `Textarea` (rows 6), markdown allowed, plus a small "Preview" toggle.
 3. **Classification**
    - Category: a `Select` with the 9 categories (human labels, e.g. "STEM, coding & robotics").
-   - Age range: a dual-thumb `Slider` from 3 to 18 with a live label "Ages 8–12".
+   - Age range: a dual-thumb slider from 3 to 18 with a live label "Ages 8–12" (`range-slider.tsx`, built on the Radix primitive so each thumb gets its own aria-label).
    - Format: a `ToggleGroup` (1:1 | Small group). When "Small group" is selected, a "Max group size" number `Input` appears.
    - Mode: a `ToggleGroup` (Virtual | In person | Hybrid) with icons `Video`, `MapPin`, `Shuffle`.
 4. **Session & price**
    - Duration: a `Select` (30 / 45 / 60 / 90 min).
    - Price band: two number inputs (min, max) + currency, with a `PricePill` above reading "Suggested from category + format". Add a `Tooltip` on an info icon: "Static heuristic, not market data."
-   - Availability: a `Popover` + `Calendar` for picking weekly slots. It's required and starts empty (this is always a missing field).
+   - Availability: a `Popover` with a weekday `ToggleGroup` plus start-time chips (07:00–20:00); slots are every chosen day × time, each one session long. (A `Calendar` picks dates, not weekly slots, so it's used only in `BookDialog`.) It's required and starts empty (this is always a missing field).
 5. **Discovery**
    - Skills and tags: an editable chip input (type + Enter; chips are `Badge variant="secondary"` with an `X`).
    - Social caption: `Textarea`, a 150-char counter, and a **Regenerate** ghost button with a `Sparkles` icon.

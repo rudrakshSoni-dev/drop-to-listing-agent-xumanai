@@ -26,6 +26,8 @@ class Settings:
     max_video_seconds: int = field(
         default_factory=lambda: int(_env("MAX_VIDEO_SECONDS", "180") or 180)
     )
+    # Path to a recorded LLM fixture (tests/fixtures/*.json). Replaces Gemini when set.
+    llm_fixture: str = field(default_factory=lambda: _env("LLM_FIXTURE"))
     max_upload_mb: int = 200
     cors_origins: list[str] = field(
         default_factory=lambda: _env("CORS_ORIGINS", "http://localhost:3000").split(",")

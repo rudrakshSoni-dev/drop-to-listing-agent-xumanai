@@ -12,9 +12,24 @@ const root = JSON.parse(readFileSync(schemaPath, "utf8"));
 const defs = root.$defs ?? {};
 
 const SUPPORTED = new Set([
-  "$schema", "$id", "$defs", "title", "type", "enum", "properties", "required",
-  "additionalProperties", "items", "anyOf", "$ref", "minimum", "maximum",
-  "minLength", "maxLength", "pattern", "format",
+  "$schema",
+  "$id",
+  "$defs",
+  "title",
+  "type",
+  "enum",
+  "properties",
+  "required",
+  "additionalProperties",
+  "items",
+  "anyOf",
+  "$ref",
+  "minimum",
+  "maximum",
+  "minLength",
+  "maxLength",
+  "pattern",
+  "format",
 ]);
 
 function toZod(s) {
@@ -26,7 +41,8 @@ function toZod(s) {
   if (s.enum) return `z.enum([${s.enum.map((v) => JSON.stringify(v)).join(", ")}])`;
   if (Array.isArray(s.type)) {
     const nonNull = s.type.filter((t) => t !== "null");
-    if (nonNull.length !== 1 || s.type.length !== 2) throw new Error("Only [T, null] unions supported");
+    if (nonNull.length !== 1 || s.type.length !== 2)
+      throw new Error("Only [T, null] unions supported");
     return `${toZod({ ...s, type: nonNull[0] })}.nullable()`;
   }
   switch (s.type) {
@@ -77,7 +93,10 @@ function emit(name) {
 }
 Object.keys(defs).forEach(emit);
 
-const { $defs: _d, $schema: _s, $id: _i, title, ...listing } = root;
+const { title } = root;
+const listing = Object.fromEntries(
+  Object.entries(root).filter(([k]) => !["$defs", "$schema", "$id", "title"].includes(k)),
+);
 blocks.push(
   `export const ${title}Schema = ${toZod(listing)};\nexport type ${title} = z.infer<typeof ${title}Schema>;`,
 );

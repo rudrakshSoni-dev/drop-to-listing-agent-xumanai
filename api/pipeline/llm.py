@@ -58,10 +58,14 @@ class GeminiLLM:
 
 
 class FixtureLLM:
-    """Replays recorded responses in order, keyed by the response schema's name."""
+    """Replays recorded responses in order, keyed by the response schema's name.
 
-    def __init__(self, responses: dict[str, list[str]]) -> None:
+    With `cycle=True` the last response repeats forever (offline dev and smoke tests).
+    """
+
+    def __init__(self, responses: dict[str, list[str]], cycle: bool = False) -> None:
         self._responses = {k: list(v) for k, v in responses.items()}
+        self._cycle = cycle
         self.prompts: list[str] = []
 
     async def generate_json(
@@ -71,7 +75,7 @@ class FixtureLLM:
         queue = self._responses.get(schema.__name__)
         if not queue:
             raise AssertionError(f"no recorded response left for {schema.__name__}")
-        return queue.pop(0)
+        return queue[0] if self._cycle and len(queue) == 1 else queue.pop(0)
 
 
 class LazyLLM:
