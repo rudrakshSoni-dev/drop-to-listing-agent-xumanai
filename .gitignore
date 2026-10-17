@@ -15,3 +15,6 @@ api/data/
 *.m4a
 next-env.d.ts
 *.tsbuildinfo
+
+# Assembled Hugging Face Space (deploy/hf-space/build.sh)
+deploy/hf-space/out/
