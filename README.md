@@ -111,7 +111,7 @@ We evaluate the full pipeline against 26 hand-labeled public videos across all 9
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/rudraksh61/drop-to-listing-agent-xumanai.git
+git clone https://github.com/rudrakshSoni-dev/drop-to-listing-agent-xumanai.git
 cd drop-to-listing-agent-xumanai
 
 # 2. Install dependencies (creates api/.venv and runs pnpm install)

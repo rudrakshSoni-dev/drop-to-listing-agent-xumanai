@@ -206,7 +206,7 @@ export default function AboutPage() {
         </Button>
         <Button asChild variant="ghost" className="gap-2">
           <a
-            href="https://github.com/rudraksh61/drop-to-listing-agent-xumanai"
+            href="https://github.com/rudrakshSoni-dev/drop-to-listing-agent-xumanai"
             target="_blank"
             rel="noreferrer"
           >
