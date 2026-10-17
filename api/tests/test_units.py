@@ -327,3 +327,34 @@ async def test_groq_llm_generates_json_and_records_usage(monkeypatch: pytest.Mon
     assert len(llm.calls) == 1
     assert llm.calls[0].model == "openai/gpt-oss-120b"
     assert llm.calls[0].input_tokens == 12
+
+
+async def test_transcribe_groq_parses_segments(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import httpx
+
+    from pipeline import transcribe
+
+    dummy_audio = tmp_path / "audio.mp3"
+    dummy_audio.write_bytes(b"dummy mp3 data")
+
+    fake_response = {
+        "text": "Hello world welcome to calculus",
+        "segments": [
+            {"start": 0.0, "end": 2.5, "text": "Hello world"},
+            {"start": 2.5, "end": 5.0, "text": "welcome to calculus"},
+        ],
+    }
+
+    async def mock_post(*args: Any, **kwargs: Any) -> httpx.Response:
+        return httpx.Response(200, json=fake_response)
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", mock_post)
+
+    lines = await transcribe.transcribe_groq(dummy_audio, duration_s=10.0, api_key="gsk_test")
+    assert len(lines) == 2
+    assert lines[0].text == "Hello world"
+    assert lines[0].start == 0.0
+    assert lines[1].text == "welcome to calculus"
+

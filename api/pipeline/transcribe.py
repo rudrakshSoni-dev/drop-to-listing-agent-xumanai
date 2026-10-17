@@ -76,6 +76,50 @@ async def transcribe_gemini(audio: Path, duration_s: float, llm: LLM) -> list[Tr
     return clean_segments(result.segments, duration_s)
 
 
+async def transcribe_groq(
+    audio: Path,
+    duration_s: float,
+    api_key: str,
+    base_url: str = "https://api.groq.com/openai/v1",
+) -> list[TranscriptLine]:
+    import httpx
+
+    hint = prompts.render("whisper_hint_v1")
+    url = f"{base_url}/audio/transcriptions"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    data = {
+        "model": "whisper-large-v3-turbo",
+        "response_format": "verbose_json",
+        "prompt": hint,
+    }
+    files = {"file": (audio.name, audio.read_bytes(), "audio/mp3")}
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            resp = await client.post(url, headers=headers, data=data, files=files)
+        except httpx.RequestError as exc:
+                raise PipelineError(
+                    ErrorCode.TRANSCRIBE_FAIL, f"Groq Whisper network error: {exc}"
+                ) from exc
+
+    if resp.status_code != 200:
+        raise PipelineError(
+            ErrorCode.TRANSCRIBE_FAIL,
+            f"Groq Whisper error {resp.status_code}: {resp.text[:200]}",
+        )
+
+    try:
+        payload = resp.json()
+    except Exception as exc:
+        raise PipelineError(ErrorCode.TRANSCRIBE_FAIL, "Invalid JSON from Groq Whisper") from exc
+
+    raw_segments = payload.get("segments", [])
+    parsed = [
+        _Segment(start=float(s["start"]), end=float(s["end"]), text=str(s["text"]))
+        for s in raw_segments
+    ]
+    return clean_segments(drop_hint_echoes(parsed, hint), duration_s)
+
+
 _whisper_models: dict[str, Any] = {}
 _whisper_lock = threading.Lock()
 

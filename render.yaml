@@ -24,7 +24,9 @@ services:
       - key: CORS_ORIGINS
         value: "*"
       - key: TRANSCRIBE_BACKEND
-        value: whisper
+        value: groq
+      - key: WHISPER_MODEL
+        value: tiny.en
       - key: DEMO_DROPS_PER_IP
         value: "0"
       - key: GEMINI_API_KEY

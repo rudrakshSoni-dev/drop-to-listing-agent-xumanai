@@ -26,8 +26,9 @@ Emit = Callable[[dict[str, Any]], Awaitable[None]]
 @dataclass(frozen=True)
 class RunConfig:
     max_video_seconds: int
-    transcribe_backend: Literal["gemini", "whisper"]
-    whisper_model: str = "small.en"
+    transcribe_backend: Literal["gemini", "whisper", "groq"]
+    whisper_model: str = "tiny.en"
+    groq_api_key: str = ""
 
 
 @dataclass(frozen=True)
@@ -78,7 +79,11 @@ async def run_pipeline(
         audio = await run_in_threadpool(
             transcribe.extract_audio, video, drop.work_dir / "audio.mp3"
         )
-        if config.transcribe_backend == "whisper":
+        if config.transcribe_backend == "groq" and config.groq_api_key:
+            lines = await transcribe.transcribe_groq(
+                audio, info.duration_s, config.groq_api_key
+            )
+        elif config.transcribe_backend == "whisper":
             lines = await run_in_threadpool(
                 transcribe.transcribe_whisper, audio, info.duration_s, config.whisper_model
             )

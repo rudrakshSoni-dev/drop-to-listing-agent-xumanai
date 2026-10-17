@@ -56,12 +56,18 @@ class Settings:
     )
     # Cache LLM responses on disk so retries and eval reruns spend no quota.
     llm_cache: bool = field(default_factory=lambda: _env("LLM_CACHE", "1") != "0")
-    transcribe_backend: Literal["gemini", "whisper"] = field(
+    transcribe_backend: Literal["gemini", "whisper", "groq"] = field(
         default_factory=lambda: cast(
-            Literal["gemini", "whisper"], _env("TRANSCRIBE_BACKEND", "whisper") or "whisper"
+            Literal["gemini", "whisper", "groq"],
+            _env("TRANSCRIBE_BACKEND")
+            or (
+                "groq"
+                if (_env("LLM_PROVIDER") != "gemini" and _env("GROQ_API_KEY"))
+                else "whisper"
+            ),
         )
     )
-    whisper_model: str = field(default_factory=lambda: _env("WHISPER_MODEL") or "small.en")
+    whisper_model: str = field(default_factory=lambda: _env("WHISPER_MODEL") or "tiny.en")
     # New drops allowed per client IP per day (0 = unlimited). Protects the shared
     # free-tier key on a public demo.
     demo_drops_per_ip: int = field(

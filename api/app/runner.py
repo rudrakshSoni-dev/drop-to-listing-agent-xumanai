@@ -85,6 +85,7 @@ async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
         max_video_seconds=settings.max_video_seconds,
         transcribe_backend=settings.transcribe_backend,
         whisper_model=settings.whisper_model,
+        groq_api_key=settings.groq_api_key,
     )
 
     current_stage: str | None = None
