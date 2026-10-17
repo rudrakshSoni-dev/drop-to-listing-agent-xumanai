@@ -6,6 +6,7 @@
 [![Tests](https://img.shields.io/badge/tests-passing-emerald.svg)](Makefile)
 [![Playwright E2E](https://img.shields.io/badge/playwright-offline%20e2e%20passing-blue.svg)](web/e2e/main-path.spec.ts)
 [![Evaluations](https://img.shields.io/badge/evals-26%20public%20videos-purple.svg)](evals/results.json)
+[![Groq](https://img.shields.io/badge/groq-gpt--oss--120b-f55036.svg)](https://groq.com)
 [![Next.js 15](https://img.shields.io/badge/next.js-15%20App%20Router-black.svg)](web/)
 [![FastAPI](https://img.shields.io/badge/fastapi-0.115+-009688.svg)](api/)
 
@@ -66,11 +67,12 @@ deploy/
   hf-space/     production Dockerfile + build script for Hugging Face Spaces (CPU tier)
 ```
 
-### 1. Strict Free-Tier LLM Budget (~20 req/day per model)
+### 1. Dual-Provider LLM Engine (Groq `gpt-oss-120b` + Gemini)
+- **Groq LPU Acceleration**: High-speed structured extraction powered by open-weight flagship **`openai/gpt-oss-120b`** (500+ tokens/sec on Groq LPUs) with automatic fallback to `llama-3.3-70b-versatile`.
+- **Gemini Fallback Support**: Fully compatible with Google Gemini Flash variants via `LLM_PROVIDER=gemini`.
 - **Local Speech-to-Text**: Video audio is transcribed locally with `faster-whisper` (`small.en`, int8 quantized on CPU), consuming **0 model requests**.
 - **Unified Extraction & Safety**: Youth-safety LLM classification is piggybacked into the single structured extraction pass (`api/prompts/extract_v5.md`).
 - **Disk Caching**: `CachedLLM` stores responses keyed by prompt + schema + media hash (`api/data/llm_cache/`). Retries, repeated links, and eval reruns cost nothing.
-- **Quota Rotation**: `LLM_MODELS` rotates through available Gemini flash variants on 429/503 quotas.
 
 ### 2. Pre-Processed Replay Seeds (`api/seed/`)
 - Three real tutor videos (`math`, `ib-tutors`, `english`) are pre-seeded with saved frame JPEGs, SSE timeline events, and listings.
