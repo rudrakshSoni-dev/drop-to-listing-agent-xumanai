@@ -69,3 +69,14 @@ describe("durations", () => {
     expect(durationOptions(210)).toContain(210);
   });
 });
+
+describe("youtubeId", () => {
+  it("reads watch, short, shorts and embed links", async () => {
+    const { youtubeId } = await import("@/lib/sources");
+    expect(youtubeId("https://www.youtube.com/watch?v=abc_123")).toBe("abc_123");
+    expect(youtubeId("https://youtu.be/abc")).toBe("abc");
+    expect(youtubeId("https://m.youtube.com/shorts/xyz-9")).toBe("xyz-9");
+    expect(youtubeId("https://www.tiktok.com/@a/video/1")).toBeNull();
+    expect(youtubeId(null)).toBeNull();
+  });
+});

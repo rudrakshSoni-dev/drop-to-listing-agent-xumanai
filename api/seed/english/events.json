@@ -1,0 +1,138 @@
+[
+ {
+  "kind": "stage",
+  "stage": "fetching",
+  "detail": "Downloading from YouTube",
+  "t": 0
+ },
+ {
+  "kind": "media",
+  "duration_s": 75.46,
+  "width": 640,
+  "height": 360,
+  "caption": "Jami-Lee | Friendly English Tutor for Kids & Beginners | Introduction Video\n\nHi, I'm Teacher Jami-Lee! \ud83d\udc4b Watch this short video to meet your future English tutor and see how I make learning English fun, not scary.\n\nIn this video, you'll learn:\n\u2714 A little about me and my teaching style\n\u2714 How my lessons work: colourful, interactive and step by step\n\u2714 How I help beginners and young learners speak with confidence\n\nAbout me:\nI'm a native English speaker from South Africa. I'm TEFL-trained and have a degree in Counselling & Psychology. I volunteer with Grade 2 learners in a reading club, and my lessons use picture-led slides, games and speaking practice, plus a hand puppet for younger students.\n\nWhat to expect in a lesson with me:\nA warm, patient, mistake-friendly space\nClear structure with lots of speaking practice\nLessons tailored to your goals and pace\n\nReady to start? Book a trial lesson with me and let's take your first step together! \ud83d\ude0a\n#ESLTeacher #EnglishTutor #LearnEnglish #TEFL #Onl",
+  "t": 6938
+ },
+ {
+  "kind": "stage",
+  "stage": "transcribing",
+  "detail": "Listening to the audio",
+  "t": 6938
+ },
+ {
+  "kind": "transcript",
+  "lines": [
+   {
+    "start": 0.59,
+    "end": 9.59,
+    "text": "Hello and welcome. My name is Jeremy Lee and I'm from beautiful Cape Town, South Africa."
+   },
+   {
+    "start": 9.59,
+    "end": 20.59,
+    "text": "It's so lovely to meet you. I'm a qualified TEFL teacher with a Bachelor of Applied Social Sciences in Counseling and Psychology,"
+   },
+   {
+    "start": 20.59,
+    "end": 27.59,
+    "text": "as well as several years of experience in student support and online education."
+   },
+   {
+    "start": 28.59,
+    "end": 32.59,
+    "text": "My teaching style is warm, patient and interactive."
+   },
+   {
+    "start": 32.59,
+    "end": 41.59,
+    "text": "I want my students to feel comfortable making mistakes, asking questions and building confidence while learning English."
+   },
+   {
+    "start": 41.59,
+    "end": 55.59,
+    "text": "Together, we can work on speaking, pronunciation, vocabulary, grammar, reading and everyday conversation while tailoring lessons to your individual goals."
+   },
+   {
+    "start": 55.59,
+    "end": 61.59,
+    "text": "Whether you're learning English for school, work, travel or simply to become more confident,"
+   },
+   {
+    "start": 61.59,
+    "end": 65.59,
+    "text": "I'm here to support and encourage you every step of the way."
+   },
+   {
+    "start": 65.59,
+    "end": 69.59,
+    "text": "So, let's learn, grow and have some fun together."
+   },
+   {
+    "start": 69.59,
+    "end": 74.59,
+    "text": "I can't wait to meet you. See you in class. Bye-bye."
+   }
+  ],
+  "t": 25588
+ },
+ {
+  "kind": "detail",
+  "detail": "Heard: \u201cHello and welcome. My name is Jeremy Lee and I'm from beaut\u2026\u201d",
+  "t": 25588
+ },
+ {
+  "kind": "stage",
+  "stage": "extracting_frames",
+  "detail": "Looking for scene changes",
+  "t": 25588
+ },
+ {
+  "kind": "frames",
+  "frames": [
+   {
+    "file": "frame_00.jpg",
+    "t": 7.55
+   },
+   {
+    "file": "frame_01.jpg",
+    "t": 22.64
+   },
+   {
+    "file": "frame_02.jpg",
+    "t": 37.73
+   },
+   {
+    "file": "frame_03.jpg",
+    "t": 52.82
+   },
+   {
+    "file": "frame_04.jpg",
+    "t": 67.91
+   }
+  ],
+  "thumbnail": "frame_00.jpg",
+  "t": 26438
+ },
+ {
+  "kind": "detail",
+  "detail": "Picked 5 key frames",
+  "t": 26438
+ },
+ {
+  "kind": "stage",
+  "stage": "analyzing",
+  "detail": "Understanding the service",
+  "t": 26439
+ },
+ {
+  "kind": "detail",
+  "detail": "Looks like: Personalized English Language Tutoring",
+  "t": 33361
+ },
+ {
+  "kind": "stage",
+  "stage": "guardrails",
+  "detail": "Checking for youth-safety risks",
+  "t": 33362
+ }
+]

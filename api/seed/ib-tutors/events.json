@@ -1,0 +1,123 @@
+[
+ {
+  "kind": "stage",
+  "stage": "fetching",
+  "detail": "Downloading from YouTube",
+  "t": 1
+ },
+ {
+  "kind": "media",
+  "duration_s": 37.38,
+  "width": 1280,
+  "height": 720,
+  "caption": "Best Tutors for IB | Online Classes for IB | www.edvi.app\n\nedvi provides private tutors (1-to-1) for all subjects and boards (IGCSE, CBSE, ICSE, IB, etc.)\nBook a 1 hour free demo. Call on WhatsApp at +91-8448223321\nVisit : https://edvi.app/",
+  "t": 4745
+ },
+ {
+  "kind": "stage",
+  "stage": "transcribing",
+  "detail": "Listening to the audio",
+  "t": 4745
+ },
+ {
+  "kind": "transcript",
+  "lines": [
+   {
+    "start": 0.0,
+    "end": 6.24,
+    "text": "Hi, my name is Fiksha and I'm a student of grade 12. I was fed up with taking trial classes."
+   },
+   {
+    "start": 6.24,
+    "end": 11.2,
+    "text": "Most of the Indian tutors have no clue about the IB curriculum. I came to know about Edvi from one"
+   },
+   {
+    "start": 11.2,
+    "end": 16.88,
+    "text": "of my classmates. I was really satisfied with the trial classes and immediately enrolled for"
+   },
+   {
+    "start": 16.88,
+    "end": 23.2,
+    "text": "physics tuition given by Govitama. I really wish every student get a tutor like her. She's so good"
+   },
+   {
+    "start": 23.2,
+    "end": 27.76,
+    "text": "at explaining the concepts and I've started really enjoying the subject. I always recommend"
+   },
+   {
+    "start": 27.76,
+    "end": 32.0,
+    "text": "my classmates and junior to try Edvi for one-to-one tuition classes."
+   }
+  ],
+  "t": 18150
+ },
+ {
+  "kind": "detail",
+  "detail": "Heard: \u201cHi, my name is Fiksha and I'm a student of grade 12. I was\u2026\u201d",
+  "t": 18150
+ },
+ {
+  "kind": "stage",
+  "stage": "extracting_frames",
+  "detail": "Looking for scene changes",
+  "t": 18150
+ },
+ {
+  "kind": "frames",
+  "frames": [
+   {
+    "file": "frame_00.jpg",
+    "t": 3.74
+   },
+   {
+    "file": "frame_01.jpg",
+    "t": 11.21
+   },
+   {
+    "file": "frame_02.jpg",
+    "t": 18.69
+   },
+   {
+    "file": "frame_03.jpg",
+    "t": 26.17
+   },
+   {
+    "file": "frame_04.jpg",
+    "t": 33.64
+   }
+  ],
+  "thumbnail": "frame_02.jpg",
+  "t": 19425
+ },
+ {
+  "kind": "detail",
+  "detail": "Picked 5 key frames",
+  "t": 19425
+ },
+ {
+  "kind": "stage",
+  "stage": "analyzing",
+  "detail": "Understanding the service",
+  "t": 19425
+ },
+ {
+  "kind": "detail",
+  "detail": "Looks like: Private IB and Academic Subject Tutoring",
+  "t": 19428
+ },
+ {
+  "kind": "stage",
+  "stage": "guardrails",
+  "detail": "Checking for youth-safety risks",
+  "t": 19428
+ },
+ {
+  "kind": "detail",
+  "detail": "Flagged 1 item for review",
+  "t": 19429
+ }
+]

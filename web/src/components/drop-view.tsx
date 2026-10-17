@@ -98,6 +98,7 @@ export function DropView({ id }: { id: string }) {
             <VideoPanel
               videoRef={videoRef}
               src={mediaUrl ? apiUrl(mediaUrl) : null}
+              sourceUrl={drop.data?.source.url}
               width={width}
               height={height}
               sourceType={drop.data?.source.type ?? "upload"}
@@ -130,6 +131,12 @@ export function DropView({ id }: { id: string }) {
             ) : (
               <Card className="p-4 md:p-6">
                 <PipelineStepper state={events} />
+                {drop.data?.example && (
+                  <p className="text-muted-foreground border-t pt-3 text-xs">
+                    Example · pre-processed: replaying a recorded run of the real pipeline, so it
+                    needs no AI quota.
+                  </p>
+                )}
               </Card>
             )}
           </div>

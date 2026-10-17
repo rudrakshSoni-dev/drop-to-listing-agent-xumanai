@@ -1,0 +1,110 @@
+{
+ "id": "ib-tutors",
+ "source": {
+  "type": "youtube",
+  "url": "https://www.youtube.com/watch?v=xygGW4FjvFk",
+  "duration_s": 37.38
+ },
+ "title": "Private IB and Academic Subject Tutoring",
+ "summary": "Personalized one-on-one academic tutoring for students across various curricula including IB, IGCSE, CBSE, and ICSE.",
+ "description": "This service provides private, one-on-one academic tutoring tailored to support students across multiple educational boards, including IB, IGCSE, CBSE, and ICSE. Sessions are designed to help students master complex concepts, improve subject understanding, and build confidence in their academic performance. Whether you are looking for help with physics or other core subjects, these sessions offer a focused environment to address individual learning needs and curriculum-specific requirements.",
+ "category": "academic_tutoring",
+ "subcategory": "IB Curriculum Support",
+ "age_range": {
+  "min": 13,
+  "max": 18
+ },
+ "format": {
+  "group": "one_on_one",
+  "mode": "virtual",
+  "max_group_size": null
+ },
+ "session": {
+  "duration_min": 60,
+  "price_band": {
+   "min": 30.0,
+   "max": 55.0,
+   "currency": "USD"
+  }
+ },
+ "skills": [
+  "Subject mastery",
+  "Conceptual understanding",
+  "Academic problem solving",
+  "Curriculum-specific study skills"
+ ],
+ "tags": [
+  "ib",
+  "igcse",
+  "cbse",
+  "icse",
+  "tutoring",
+  "academic support",
+  "online learning"
+ ],
+ "caption": "Struggling with your IB curriculum? Get personalized one-on-one academic support for all subjects and boards. Book your free demo class today!",
+ "thumbnail_frame": "frame_02.jpg",
+ "availability": null,
+ "confidence": {
+  "title": 0.9,
+  "summary": 0.9,
+  "description": 0.9,
+  "category": 1.0,
+  "subcategory": 0.8,
+  "age_range": 0.6,
+  "format.group": 1.0,
+  "format.mode": 0.7,
+  "session.duration_min": 0.9,
+  "skills": 0.7,
+  "tags": 0.7,
+  "caption": 0.9
+ },
+ "missing_fields": [
+  "availability"
+ ],
+ "guardrails": {
+  "status": "block",
+  "flags": [
+   {
+    "code": "OFF_PLATFORM_CONTACT",
+    "severity": "high",
+    "evidence": "Best Tutors for IB | Online Classes for IB | www.edvi.app\n\nedvi provides private tutors (1-to-1) for all subjects and boards (I…",
+    "explanation": "Asks families to make contact outside the platform, where messages with minors aren't visible or protected.",
+    "timestamp_s": null
+   }
+  ]
+ },
+ "transcript": [
+  {
+   "start": 0.0,
+   "end": 6.24,
+   "text": "Hi, my name is Fiksha and I'm a student of grade 12. I was fed up with taking trial classes."
+  },
+  {
+   "start": 6.24,
+   "end": 11.2,
+   "text": "Most of the Indian tutors have no clue about the IB curriculum. I came to know about Edvi from one"
+  },
+  {
+   "start": 11.2,
+   "end": 16.88,
+   "text": "of my classmates. I was really satisfied with the trial classes and immediately enrolled for"
+  },
+  {
+   "start": 16.88,
+   "end": 23.2,
+   "text": "physics tuition given by Govitama. I really wish every student get a tutor like her. She's so good"
+  },
+  {
+   "start": 23.2,
+   "end": 27.76,
+   "text": "at explaining the concepts and I've started really enjoying the subject. I always recommend"
+  },
+  {
+   "start": 27.76,
+   "end": 32.0,
+   "text": "my classmates and junior to try Edvi for one-to-one tuition classes."
+  }
+ ],
+ "created_at": "2026-10-16T21:39:13.697541Z"
+}

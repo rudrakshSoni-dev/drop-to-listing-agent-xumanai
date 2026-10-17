@@ -1,6 +1,7 @@
 import { AudioLines, CalendarCheck, ShieldCheck } from "lucide-react";
 
 import { DropInput } from "@/components/drop-input";
+import { ExampleChips } from "@/components/example-chips";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -33,6 +34,7 @@ export default function HomePage() {
       </p>
 
       <DropInput />
+      <ExampleChips />
 
       <section aria-labelledby="how-it-works" className="mt-20">
         <h2 id="how-it-works" className="sr-only">

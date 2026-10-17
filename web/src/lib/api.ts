@@ -25,7 +25,16 @@ export interface DropInfo {
   transcript: Listing["transcript"] | null;
   frames: { file: string; t: number }[];
   thumbnail: string | null;
+  /** Set when this drop replays a pre-processed example. */
+  example: string | null;
   created_at: string;
+}
+
+export interface ExampleInfo {
+  slug: string;
+  label: string;
+  title: string;
+  source_type: Listing["source"]["type"];
 }
 
 export interface BookingConfirmation {
@@ -90,6 +99,13 @@ export const api = {
   },
   createDropFromUrl(url: string): Promise<{ drop_id: string }> {
     return request("/api/drops", { method: "POST", ...json({ url }) });
+  },
+  async listExamples(): Promise<ExampleInfo[]> {
+    const { items } = await request<{ items: ExampleInfo[] }>("/api/examples");
+    return items;
+  },
+  createExampleDrop(slug: string): Promise<{ drop_id: string }> {
+    return request("/api/drops", { method: "POST", ...json({ example: slug }) });
   },
   getDrop(id: string): Promise<DropInfo> {
     return request(`/api/drops/${id}`);

@@ -27,6 +27,8 @@ class Drop(SQLModel, table=True):
     frames_json: str | None = None
     thumbnail: str | None = None
     client_ip: str | None = None
+    # Slug of the pre-processed example this drop replays, if any.
+    example: str | None = None
     created_at: datetime = Field(default_factory=_now)
 
 

@@ -215,7 +215,7 @@ make test      # pytest (api) + vitest (web) + typecheck + lint
 
 **Git**
 - Conventional commits (`feat:`, `fix:`, `chore:`, `eval:`).
-- Don't commit media, `.env`, `api/data/`, or the DB.
+- Don't commit media, `.env`, `api/data/`, or the DB. One exception: the key-frame JPEGs of the pre-processed examples in `api/seed/` (about 10 KB each), so the hosted demo works without a model call. Their source videos are never committed; examples play the platform's embed.
 
 ---
 

@@ -1,0 +1,173 @@
+[
+ {
+  "kind": "stage",
+  "stage": "fetching",
+  "detail": "Downloading from YouTube",
+  "t": 1
+ },
+ {
+  "kind": "media",
+  "duration_s": 102.12,
+  "width": 1280,
+  "height": 720,
+  "caption": "Preply Introduction video - Physics Tutor",
+  "t": 10375
+ },
+ {
+  "kind": "stage",
+  "stage": "transcribing",
+  "detail": "Listening to the audio",
+  "t": 10375
+ },
+ {
+  "kind": "transcript",
+  "lines": [
+   {
+    "start": 0.72,
+    "end": 7.44,
+    "text": "Hello, my name is Afifa and I'm from Pakistan. I am an electrical engineer, so being from"
+   },
+   {
+    "start": 7.44,
+    "end": 13.12,
+    "text": "an engineering background, I can quite efficiently help out students in the subjects mathematics,"
+   },
+   {
+    "start": 13.12,
+    "end": 19.52,
+    "text": "physics as well as chemistry. I have been online tutoring students for more than two years now"
+   },
+   {
+    "start": 19.52,
+    "end": 24.36,
+    "text": "and the students that I've taught were from different classes across the globe ranging"
+   },
+   {
+    "start": 24.36,
+    "end": 31.64,
+    "text": "from class 6 till 12 across Canada, UK and USA. I've also been part of a well-reputable"
+   },
+   {
+    "start": 31.64,
+    "end": 37.24,
+    "text": "online teaching academy here in Pakistan which was affiliated with the Cambridge curriculum,"
+   },
+   {
+    "start": 37.24,
+    "end": 42.84,
+    "text": "so I have an experience of preparing students for the Cambridge exams and I have gotten a great"
+   },
+   {
+    "start": 42.84,
+    "end": 49.16,
+    "text": "feedback from the students and their parents when my students have significantly improved their grades."
+   },
+   {
+    "start": 50.12,
+    "end": 55.88,
+    "text": "Now a little bit about my teaching methodology, the online platform that I would be using would"
+   },
+   {
+    "start": 55.88,
+    "end": 62.6,
+    "text": "be the platform that the student is particularly familiar and comfortable with. It could be Zoom,"
+   },
+   {
+    "start": 62.6,
+    "end": 69.8,
+    "text": "MS Teams or Google classroom and especially for mathematics, I use Google Jamboard to make the"
+   },
+   {
+    "start": 69.8,
+    "end": 76.12,
+    "text": "sessions as interactive as possible where the student could also participate and solve the"
+   },
+   {
+    "start": 76.12,
+    "end": 82.6,
+    "text": "mathematical questions with me. At times, I also provide my students with additional study notes"
+   },
+   {
+    "start": 82.6,
+    "end": 88.6,
+    "text": "to make things easier for them because that's what I'm here for, to make learning easier for you."
+   },
+   {
+    "start": 89.64,
+    "end": 93.8,
+    "text": "So if you're looking for help in these subjects, you can book a session with me right now"
+   },
+   {
+    "start": 94.44,
+    "end": 99.24,
+    "text": "and I would be looking forward to meeting you in my class and I hope you could have"
+   },
+   {
+    "start": 99.24,
+    "end": 102.04,
+    "text": "a great time together. Thank you."
+   }
+  ],
+  "t": 40713
+ },
+ {
+  "kind": "detail",
+  "detail": "Heard: \u201cHello, my name is Afifa and I'm from Pakistan. I am an elec\u2026\u201d",
+  "t": 40713
+ },
+ {
+  "kind": "stage",
+  "stage": "extracting_frames",
+  "detail": "Looking for scene changes",
+  "t": 40713
+ },
+ {
+  "kind": "frames",
+  "frames": [
+   {
+    "file": "frame_00.jpg",
+    "t": 10.21
+   },
+   {
+    "file": "frame_01.jpg",
+    "t": 30.64
+   },
+   {
+    "file": "frame_02.jpg",
+    "t": 51.06
+   },
+   {
+    "file": "frame_03.jpg",
+    "t": 71.48
+   },
+   {
+    "file": "frame_04.jpg",
+    "t": 91.91
+   }
+  ],
+  "thumbnail": "frame_00.jpg",
+  "t": 43089
+ },
+ {
+  "kind": "detail",
+  "detail": "Picked 5 key frames",
+  "t": 43089
+ },
+ {
+  "kind": "stage",
+  "stage": "analyzing",
+  "detail": "Understanding the service",
+  "t": 43089
+ },
+ {
+  "kind": "detail",
+  "detail": "Looks like: Online STEM Tutoring: Math, Physics, and Chemistry",
+  "t": 43092
+ },
+ {
+  "kind": "stage",
+  "stage": "guardrails",
+  "detail": "Checking for youth-safety risks",
+  "t": 43092
+ }
+]

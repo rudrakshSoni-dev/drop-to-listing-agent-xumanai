@@ -1,0 +1,9 @@
+[
+ {
+  "code": "OFF_PLATFORM_CONTACT",
+  "severity": "high",
+  "evidence": "Call on WhatsApp at +91-8448223321 Visit : https://edvi.app/",
+  "explanation": "The listing directs users to contact the provider via WhatsApp and an external website.",
+  "timestamp_s": null
+ }
+]

@@ -6,7 +6,7 @@ import { SourceBadge } from "@/components/source-badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { timestamp } from "@/lib/format";
-import type { SourceType } from "@/lib/sources";
+import { youtubeId, type SourceType } from "@/lib/sources";
 import { cn } from "@/lib/utils";
 
 export function VideoPanel({
@@ -14,6 +14,8 @@ export function VideoPanel({
   src,
   captionsSrc,
   poster,
+  sourceUrl,
+  embedStart,
   width,
   height,
   sourceType,
@@ -27,6 +29,10 @@ export function VideoPanel({
   captionsSrc?: string;
   /** Shown before playback; many clips open on a black frame. */
   poster?: string | null;
+  /** Used when there's no local file (pre-processed examples): play the platform embed. */
+  sourceUrl?: string | null;
+  /** Seek target for the embed (it can't be scripted like a <video>). */
+  embedStart?: number | null;
   width?: number | null;
   height?: number | null;
   sourceType: SourceType;
@@ -37,6 +43,7 @@ export function VideoPanel({
   children?: ReactNode;
 }) {
   const portrait = width && height ? height >= width : true;
+  const embedId = youtubeId(sourceUrl);
   const aspect = width && height ? `${width} / ${height}` : portrait ? "9 / 16" : "16 / 9";
 
   return (
@@ -48,7 +55,18 @@ export function VideoPanel({
         )}
         style={{ aspectRatio: aspect }}
       >
-        {src ? (
+        {!src && embedId ? (
+          <iframe
+            key={embedStart ?? "start"}
+            src={`https://www.youtube-nocookie.com/embed/${embedId}?rel=0${
+              embedStart != null ? `&start=${Math.floor(embedStart)}&autoplay=1` : ""
+            }`}
+            title="Source video"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+            className="size-full border-0"
+          />
+        ) : src ? (
           <video
             ref={videoRef}
             src={src}

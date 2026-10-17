@@ -27,18 +27,19 @@ def start(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
     task.add_done_callback(_tasks.discard)
 
 
-async def _persist_and_publish(drop_id: str, event: dict[str, Any]) -> None:
+async def persist_and_publish(drop_id: str, event: dict[str, Any]) -> None:
     if event["kind"] == "media":
         with db.session() as s:
             drop = s.get(db.Drop, drop_id)
             if drop:
                 drop.duration_s = event["duration_s"]
                 drop.width, drop.height = event["width"], event["height"]
-                drop.media_file = event["file"]
+                drop.media_file = event.get("file")
                 drop.caption = drop.caption or event.get("caption")
                 s.add(drop)
                 s.commit()
-        event = {**event, "media_url": f"/api/media/{drop_id}/{event['file']}"}
+        media_url = f"/api/media/{drop_id}/{event['file']}" if event.get("file") else None
+        event = {**event, "media_url": media_url}
     elif event["kind"] == "frames":
         with db.session() as s:
             drop = s.get(db.Drop, drop_id)
@@ -57,7 +58,7 @@ async def _persist_and_publish(drop_id: str, event: dict[str, Any]) -> None:
     await bus.publish(drop_id, event)
 
 
-def _finish(drop_id: str, status: str, error_code: str | None = None) -> None:
+def finish(drop_id: str, status: str, error_code: str | None = None) -> None:
     with db.session() as s:
         drop = s.get(db.Drop, drop_id)
         if drop:
@@ -92,18 +93,18 @@ async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
         nonlocal current_stage
         if event["kind"] == "stage":
             current_stage = event["stage"]
-        await _persist_and_publish(drop_id, event)
+        await persist_and_publish(drop_id, event)
 
     try:
         result = await run_pipeline(drop_input, LazyLLM(llm_factory), config, emit)
     except PipelineError as exc:
         log.warning("drop %s failed: %s", drop_id, exc)
-        _finish(drop_id, "error", exc.code)
+        finish(drop_id, "error", exc.code)
         await bus.publish(drop_id, {"kind": "error", "code": exc.code, "stage": current_stage})
         return
     except Exception:
         log.exception("drop %s crashed", drop_id)
-        _finish(drop_id, "error", ErrorCode.INTERNAL)
+        finish(drop_id, "error", ErrorCode.INTERNAL)
         await bus.publish(
             drop_id, {"kind": "error", "code": ErrorCode.INTERNAL, "stage": current_stage}
         )
@@ -115,7 +116,7 @@ async def _run(drop_id: str, llm_factory: Callable[[], LLM]) -> None:
         row.llm_flags_json = json.dumps([f.model_dump() for f in result.llm_flags])
         s.add(row)
         s.commit()
-    _finish(drop_id, "done")
+    finish(drop_id, "done")
     await bus.publish(drop_id, {"kind": "done", "listing_id": drop_id})
 
 

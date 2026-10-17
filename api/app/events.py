@@ -15,7 +15,9 @@ class EventBus:
         self._started: dict[str, float] = {}
 
     def reset(self, drop_id: str) -> None:
-        self._history.pop(drop_id, None)
+        # Registered with an empty history (not removed), so a client that connects
+        # before the first event waits for it instead of getting a "not running" replay.
+        self._history[drop_id] = []
         self._started[drop_id] = time.monotonic()
 
     def has(self, drop_id: str) -> bool:

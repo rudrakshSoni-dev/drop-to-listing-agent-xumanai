@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { SourceType } from "@/lib/sources";
 import { cn } from "@/lib/utils";
 
-const SOURCES: Record<SourceType, { label: string; icon: LucideIcon }> = {
+export const SOURCES: Record<SourceType, { label: string; icon: LucideIcon }> = {
   instagram: { label: "Instagram", icon: Camera },
   tiktok: { label: "TikTok", icon: Music2 },
   youtube: { label: "YouTube", icon: TvMinimalPlay },

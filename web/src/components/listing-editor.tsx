@@ -13,6 +13,7 @@ import { BookingPreview } from "@/components/booking-preview";
 import { ListingSidePanel } from "@/components/listing-side-panel";
 import { SafetyPanel } from "@/components/safety-panel";
 import { StatusBadge } from "@/components/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { TranscriptList } from "@/components/transcript-list";
 import { FrameStrip } from "@/components/frame-strip";
 import { VideoPanel } from "@/components/video-panel";
@@ -172,9 +173,14 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const [embedStart, setEmbedStart] = useState<number | null>(null);
   const seek = (seconds: number) => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video) {
+      // Examples play the platform embed, which seeks by reloading at a start time.
+      setEmbedStart(seconds);
+      return;
+    }
     video.currentTime = seconds;
     // From the Safety tab the video may be off screen (or behind the preview sheet).
     const box = video.getBoundingClientRect();
@@ -194,6 +200,8 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
       src={drop?.media_url ? apiUrl(drop.media_url) : null}
       captionsSrc={api.captionsUrl(listing.id)}
       poster={thumbnail ? apiUrl(`/api/media/${listing.id}/${thumbnail}`) : null}
+      sourceUrl={listing.source.url}
+      embedStart={embedStart}
       width={drop?.width}
       height={drop?.height}
       sourceType={listing.source.type}
@@ -353,6 +361,11 @@ export function ListingEditor({ listing, drop }: { listing: Listing; drop: DropI
               <InlineTitle />
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {drop?.example && (
+                <Badge variant="outline" className="rounded-full">
+                  Example · pre-processed
+                </Badge>
+              )}
               <StatusBadge status={listing.guardrails.status} />
               <JsonViewer data={listing} />
               <Button type="submit" disabled={!isDirty || update.isPending}>

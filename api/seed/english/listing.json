@@ -1,0 +1,126 @@
+{
+ "id": "english",
+ "source": {
+  "type": "youtube",
+  "url": "https://www.youtube.com/watch?v=BW6ZSoZsTqw",
+  "duration_s": 75.46
+ },
+ "title": "Personalized English Language Tutoring",
+ "summary": "Build confidence in English speaking, reading, and grammar through personalized, interactive lessons tailored to individual goals and pace.",
+ "description": "This English tutoring service offers a supportive and patient environment for learners looking to improve their language skills. Lessons are customized to meet the student's specific needs, whether they are learning for school, travel, work, or personal growth.\n\nStudents will work on:\n- Speaking and pronunciation\n- Vocabulary development\n- Grammar and reading comprehension\n- Everyday conversation practice\n\nThe sessions are designed to be interactive and mistake-friendly, helping students feel comfortable as they build confidence. Lessons are structured to support learners at their own pace, ensuring a steady and encouraging learning journey.",
+ "category": "academic_tutoring",
+ "subcategory": "English as a Second Language",
+ "age_range": {
+  "min": 5,
+  "max": 18
+ },
+ "format": {
+  "group": "one_on_one",
+  "mode": "virtual",
+  "max_group_size": null
+ },
+ "session": {
+  "duration_min": 60,
+  "price_band": {
+   "min": 30.0,
+   "max": 55.0,
+   "currency": "USD"
+  }
+ },
+ "skills": [
+  "English speaking",
+  "Pronunciation",
+  "Vocabulary building",
+  "Grammar",
+  "Reading comprehension",
+  "Conversational English"
+ ],
+ "tags": [
+  "esl",
+  "english tutor",
+  "language learning",
+  "speaking practice",
+  "grammar",
+  "reading"
+ ],
+ "caption": "Build confidence in English with personalized, interactive lessons. Perfect for students looking to improve speaking, reading, and grammar skills.",
+ "thumbnail_frame": "frame_00.jpg",
+ "availability": null,
+ "confidence": {
+  "title": 0.9,
+  "summary": 0.9,
+  "description": 0.9,
+  "category": 0.9,
+  "subcategory": 0.8,
+  "age_range": 0.3,
+  "format.group": 0.3,
+  "format.mode": 0.7,
+  "session.duration_min": 0.1,
+  "skills": 0.9,
+  "tags": 0.9,
+  "caption": 0.9
+ },
+ "missing_fields": [
+  "availability",
+  "age_range",
+  "format.group",
+  "session.duration_min"
+ ],
+ "guardrails": {
+  "status": "pass",
+  "flags": []
+ },
+ "transcript": [
+  {
+   "start": 0.59,
+   "end": 9.59,
+   "text": "Hello and welcome. My name is Jeremy Lee and I'm from beautiful Cape Town, South Africa."
+  },
+  {
+   "start": 9.59,
+   "end": 20.59,
+   "text": "It's so lovely to meet you. I'm a qualified TEFL teacher with a Bachelor of Applied Social Sciences in Counseling and Psychology,"
+  },
+  {
+   "start": 20.59,
+   "end": 27.59,
+   "text": "as well as several years of experience in student support and online education."
+  },
+  {
+   "start": 28.59,
+   "end": 32.59,
+   "text": "My teaching style is warm, patient and interactive."
+  },
+  {
+   "start": 32.59,
+   "end": 41.59,
+   "text": "I want my students to feel comfortable making mistakes, asking questions and building confidence while learning English."
+  },
+  {
+   "start": 41.59,
+   "end": 55.59,
+   "text": "Together, we can work on speaking, pronunciation, vocabulary, grammar, reading and everyday conversation while tailoring lessons to your individual goals."
+  },
+  {
+   "start": 55.59,
+   "end": 61.59,
+   "text": "Whether you're learning English for school, work, travel or simply to become more confident,"
+  },
+  {
+   "start": 61.59,
+   "end": 65.59,
+   "text": "I'm here to support and encourage you every step of the way."
+  },
+  {
+   "start": 65.59,
+   "end": 69.59,
+   "text": "So, let's learn, grow and have some fun together."
+  },
+  {
+   "start": 69.59,
+   "end": 74.59,
+   "text": "I can't wait to meet you. See you in class. Bye-bye."
+  }
+ ],
+ "created_at": "2026-10-16T21:38:52.149854Z"
+}

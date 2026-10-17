@@ -12,7 +12,7 @@ from sqlmodel import func, select
 from sse_starlette.sse import EventSourceResponse
 from starlette.datastructures import UploadFile
 
-from app import db, runner
+from app import db, examples, runner
 from app.config import settings
 from app.errors import ApiError
 from app.events import TERMINAL, bus
@@ -121,9 +121,20 @@ async def _create_link_drop(request: Request, ip: str) -> str:
 
 @router.post("", status_code=201)
 async def create_drop(request: Request, llm_factory: LLMFactory) -> dict[str, str]:
+    content_type = request.headers.get("content-type", "")
+    if content_type.startswith("application/json"):
+        try:
+            body = await request.json()
+        except ValueError:
+            body = None
+        if isinstance(body, dict) and "example" in body:
+            # Replays cost no model requests, so they skip the daily limit.
+            slug = body["example"]
+            if not isinstance(slug, str) or slug not in examples.seeds():
+                raise ApiError(404, "NOT_FOUND", "No example with that name.")
+            return {"drop_id": examples.create(slug)}
     ip = _client_ip(request)
     _check_daily_limit(ip)
-    content_type = request.headers.get("content-type", "")
     if not content_type.startswith("multipart/form-data"):
         drop_id = await _create_link_drop(request, ip)
         runner.start(drop_id, llm_factory)
@@ -171,6 +182,7 @@ async def get_drop(drop_id: str) -> dict[str, Any]:
         "transcript": json.loads(drop.transcript_json) if drop.transcript_json else None,
         "frames": json.loads(drop.frames_json) if drop.frames_json else [],
         "thumbnail": drop.thumbnail,
+        "example": drop.example,
         "created_at": drop.created_at.isoformat(),
     }
 
@@ -250,3 +262,11 @@ async def captions(drop_id: str) -> PlainTextResponse:
     raw = json.loads(drop.transcript_json) if drop.transcript_json else []
     lines = [TranscriptLine.model_validate(line) for line in raw]
     return PlainTextResponse(to_webvtt(lines), media_type="text/vtt")
+
+
+examples_router = APIRouter(prefix="/api/examples", tags=["examples"])
+
+
+@examples_router.get("")
+async def get_examples() -> dict[str, list[dict[str, Any]]]:
+    return {"items": examples.list_examples()}

@@ -1,0 +1,160 @@
+{
+ "id": "math",
+ "source": {
+  "type": "youtube",
+  "url": "https://www.youtube.com/watch?v=xOeI8UECxlY",
+  "duration_s": 102.12
+ },
+ "title": "Online STEM Tutoring: Math, Physics, and Chemistry",
+ "summary": "Personalized online tutoring in mathematics, physics, and chemistry for students in grades 6 through 12, featuring interactive sessions and study support.",
+ "description": "This online tutoring service provides academic support in mathematics, physics, and chemistry for students ranging from grade 6 to grade 12. With an engineering background and experience in the Cambridge curriculum, the tutor offers personalized instruction tailored to the student's needs.\n\nSessions are conducted via platforms like Zoom, MS Teams, or Google Classroom. For mathematics, the tutor utilizes Google Jamboard to create an interactive environment where students can actively participate in solving problems. The service also includes the provision of additional study notes to facilitate learning and help students improve their academic performance.",
+ "category": "academic_tutoring",
+ "subcategory": "STEM Tutoring",
+ "age_range": {
+  "min": 11,
+  "max": 18
+ },
+ "format": {
+  "group": "one_on_one",
+  "mode": "virtual",
+  "max_group_size": null
+ },
+ "session": {
+  "duration_min": 60,
+  "price_band": {
+   "min": 30.0,
+   "max": 55.0,
+   "currency": "USD"
+  }
+ },
+ "skills": [
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Problem Solving",
+  "Study Skills"
+ ],
+ "tags": [
+  "math",
+  "physics",
+  "chemistry",
+  "stem",
+  "tutoring",
+  "online learning",
+  "cambridge curriculum"
+ ],
+ "caption": "Struggling with math or science? Get personalized online tutoring in physics, chemistry, and math to help improve your grades!",
+ "thumbnail_frame": "frame_00.jpg",
+ "availability": null,
+ "confidence": {
+  "title": 0.9,
+  "summary": 0.9,
+  "description": 0.9,
+  "category": 1.0,
+  "subcategory": 0.8,
+  "age_range": 0.9,
+  "format.group": 0.3,
+  "format.mode": 1.0,
+  "session.duration_min": 0.1,
+  "skills": 0.9,
+  "tags": 0.9,
+  "caption": 0.9
+ },
+ "missing_fields": [
+  "availability",
+  "format.group",
+  "session.duration_min"
+ ],
+ "guardrails": {
+  "status": "pass",
+  "flags": []
+ },
+ "transcript": [
+  {
+   "start": 0.72,
+   "end": 7.44,
+   "text": "Hello, my name is Afifa and I'm from Pakistan. I am an electrical engineer, so being from"
+  },
+  {
+   "start": 7.44,
+   "end": 13.12,
+   "text": "an engineering background, I can quite efficiently help out students in the subjects mathematics,"
+  },
+  {
+   "start": 13.12,
+   "end": 19.52,
+   "text": "physics as well as chemistry. I have been online tutoring students for more than two years now"
+  },
+  {
+   "start": 19.52,
+   "end": 24.36,
+   "text": "and the students that I've taught were from different classes across the globe ranging"
+  },
+  {
+   "start": 24.36,
+   "end": 31.64,
+   "text": "from class 6 till 12 across Canada, UK and USA. I've also been part of a well-reputable"
+  },
+  {
+   "start": 31.64,
+   "end": 37.24,
+   "text": "online teaching academy here in Pakistan which was affiliated with the Cambridge curriculum,"
+  },
+  {
+   "start": 37.24,
+   "end": 42.84,
+   "text": "so I have an experience of preparing students for the Cambridge exams and I have gotten a great"
+  },
+  {
+   "start": 42.84,
+   "end": 49.16,
+   "text": "feedback from the students and their parents when my students have significantly improved their grades."
+  },
+  {
+   "start": 50.12,
+   "end": 55.88,
+   "text": "Now a little bit about my teaching methodology, the online platform that I would be using would"
+  },
+  {
+   "start": 55.88,
+   "end": 62.6,
+   "text": "be the platform that the student is particularly familiar and comfortable with. It could be Zoom,"
+  },
+  {
+   "start": 62.6,
+   "end": 69.8,
+   "text": "MS Teams or Google classroom and especially for mathematics, I use Google Jamboard to make the"
+  },
+  {
+   "start": 69.8,
+   "end": 76.12,
+   "text": "sessions as interactive as possible where the student could also participate and solve the"
+  },
+  {
+   "start": 76.12,
+   "end": 82.6,
+   "text": "mathematical questions with me. At times, I also provide my students with additional study notes"
+  },
+  {
+   "start": 82.6,
+   "end": 88.6,
+   "text": "to make things easier for them because that's what I'm here for, to make learning easier for you."
+  },
+  {
+   "start": 89.64,
+   "end": 93.8,
+   "text": "So if you're looking for help in these subjects, you can book a session with me right now"
+  },
+  {
+   "start": 94.44,
+   "end": 99.24,
+   "text": "and I would be looking forward to meeting you in my class and I hope you could have"
+  },
+  {
+   "start": 99.24,
+   "end": 102.04,
+   "text": "a great time together. Thank you."
+  }
+ ],
+ "created_at": "2026-10-16T21:38:18.005516Z"
+}

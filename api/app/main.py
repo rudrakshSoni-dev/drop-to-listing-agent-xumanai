@@ -44,6 +44,7 @@ app.add_middleware(
 )
 app.add_exception_handler(ApiError, api_error_handler)
 app.include_router(drops.router)
+app.include_router(drops.examples_router)
 app.include_router(listings.router)
 app.include_router(evals.router)
 

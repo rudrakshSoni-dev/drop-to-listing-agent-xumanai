@@ -215,3 +215,58 @@ async def test_evals_endpoint_serves_results_or_a_typed_404(
     (tmp_path / "notes.md").write_text("- Fails on silent videos.")
     ok = (await client.get("/api/evals")).json()
     assert ok["results"]["rows"] == [] and ok["notes_md"].startswith("- Fails")
+
+
+async def test_example_drop_replays_a_recorded_run(
+    client: httpx.AsyncClient, sample_video: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app import examples
+
+    # Record a seed from an ordinary (fixture) run.
+    source_id = await _ready_listing(client, sample_video)
+    recorded = await _events(client, source_id)
+    seed = tmp_path / "math"
+    seed.mkdir()
+    frames = next(e for e in recorded if e["kind"] == "frames")
+    for frame in frames["frames"]:  # type: ignore[attr-defined]
+        shutil.copy(settings.media_dir / source_id / frame["file"], seed / frame["file"])
+    listing = (await client.get(f"/api/listings/{source_id}")).json()
+    (seed / "listing.json").write_text(json.dumps(listing))
+    (seed / "llm_flags.json").write_text("[]")
+    (seed / "events.json").write_text(
+        json.dumps([e for e in recorded if e["kind"] not in ("done",)])
+    )
+    (seed / "meta.json").write_text(json.dumps({
+        "slug": "math", "label": "Math tutor", "source_type": "youtube",
+        "source_url": "https://www.youtube.com/watch?v=abc", "caption": "Algebra help",
+        "duration_s": 4, "width": 320, "height": 568,
+        "frames": frames["frames"], "thumbnail": frames["thumbnail"],
+    }))
+    monkeypatch.setattr(examples, "SEED_DIR", tmp_path)
+    examples.seeds.cache_clear()
+
+    listed = (await client.get("/api/examples")).json()["items"]
+    assert listed == [{"slug": "math", "label": "Math tutor", "title": listing["title"],
+                       "source_type": "youtube"}]
+    resp = await client.post("/api/drops", json={"example": "math"})
+    drop_id = resp.json()["drop_id"]
+    assert drop_id != source_id
+    events = await _events(client, drop_id)
+    assert [e["stage"] for e in events if e["kind"] == "stage"][0] == "fetching"
+    assert events[-1]["kind"] == "done"
+    assert next(e for e in events if e["kind"] == "media")["media_url"] is None
+
+    copy = (await client.get(f"/api/listings/{drop_id}")).json()
+    assert copy["id"] == drop_id and copy["title"] == listing["title"]
+    drop = (await client.get(f"/api/drops/{drop_id}")).json()
+    assert drop["example"] == "math" and drop["media_url"] is None
+    thumb = await client.get(f"/api/media/{drop_id}/{frames['thumbnail']}")
+    assert thumb.status_code == 200
+
+    missing = await client.post("/api/drops", json={"example": "nope"})
+    assert missing.status_code == 404
+    bad = await client.post(
+        "/api/drops", content=b"{not json", headers={"content-type": "application/json"}
+    )
+    assert bad.status_code == 422
+    examples.seeds.cache_clear()
