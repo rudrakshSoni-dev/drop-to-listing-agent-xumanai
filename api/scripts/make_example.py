@@ -19,15 +19,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.config import settings  # noqa: E402
 from pipeline import fetch  # noqa: E402
-from pipeline.llm import CachedLLM, GeminiLLM  # noqa: E402
+from pipeline.llm import LLM, CachedLLM, GeminiLLM, GroqLLM  # noqa: E402
 from pipeline.run import DropInput, RunConfig, run_pipeline  # noqa: E402
 
 SEED_DIR = Path(__file__).resolve().parent.parent / "seed"
 
 
 async def main(slug: str, label: str, url: str) -> None:
+    if settings.llm_provider == "groq":
+        underlying: LLM = GroqLLM(settings.groq_api_key, settings.llm_models)
+    else:
+        underlying = GeminiLLM(
+            settings.gemini_api_key, settings.llm_models, settings.llm_thinking_budget
+        )
     llm = CachedLLM(
-        GeminiLLM(settings.gemini_api_key, settings.llm_models, settings.llm_thinking_budget),
+        underlying,
         settings.llm_cache_dir,
     )
     events: list[dict[str, Any]] = []

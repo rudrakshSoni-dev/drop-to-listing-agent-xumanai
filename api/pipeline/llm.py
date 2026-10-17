@@ -170,6 +170,104 @@ class GeminiLLM:
         return await call_with_fallback(call, self._models)
 
 
+class GroqLLM:
+    """LLM client for Groq API (OpenAI-compatible) with gpt-oss-120b by default."""
+
+    def __init__(
+        self,
+        api_key: str,
+        models: list[str] | None = None,
+        base_url: str = "https://api.groq.com/openai/v1",
+    ) -> None:
+        if not api_key:
+            raise PipelineError(ErrorCode.LLM_UNAVAILABLE, "GROQ_API_KEY is required")
+        self._api_key = api_key
+        # Default to openai/gpt-oss-120b
+        chosen_models = models or ["openai/gpt-oss-120b", "llama-3.3-70b-versatile"]
+        self._models = list(dict.fromkeys(chosen_models))
+        self._base_url = base_url.rstrip("/")
+        self.calls: list[CallRecord] = []
+
+    async def generate_json(
+        self, *, prompt: str, schema: type[BaseModel], media: list[Media] | None = None
+    ) -> str:
+        import httpx
+
+        schema_json = json.dumps(schema.model_json_schema())
+        system_prompt = (
+            "You are a structured data extractor for youth services listings. "
+            "You must return ONLY a valid, single JSON object adhering strictly to "
+            f"this JSON schema:\n{schema_json}\n"
+            "Do not output markdown code blocks, explanation, or commentary. "
+            "Output valid JSON only."
+        )
+
+        async def call(model: str) -> str:
+            headers = {
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+                "response_format": {"type": "json_object"},
+                "temperature": 0.2,
+            }
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                try:
+                    resp = await client.post(
+                        f"{self._base_url}/chat/completions",
+                        headers=headers,
+                        json=payload,
+                    )
+                except httpx.RequestError as exc:
+                    raise TransientLLMError(
+                        f"Groq network error: {exc}", retry_same_model=True
+                    ) from exc
+
+                if resp.status_code in (429, 500, 502, 503, 504):
+                    is_rate_limit = resp.status_code == 429
+                    raise TransientLLMError(
+                        f"Groq {model}: {resp.status_code} {resp.text[:150]}",
+                        retry_same_model=not is_rate_limit,
+                    )
+
+                if resp.status_code != 200:
+                    raise PipelineError(
+                        ErrorCode.LLM_UNAVAILABLE,
+                        f"Groq {model} error {resp.status_code}: {resp.text[:200]}",
+                    )
+
+                try:
+                    data = resp.json()
+                except Exception as exc:
+                    raise PipelineError(
+                        ErrorCode.LLM_SCHEMA_FAIL, "Invalid JSON from Groq API"
+                    ) from exc
+
+                choice = data.get("choices", [{}])[0]
+                content = choice.get("message", {}).get("content", "")
+                if not content:
+                    raise PipelineError(ErrorCode.LLM_SCHEMA_FAIL, "empty model response")
+
+                usage = data.get("usage", {})
+                self.calls.append(
+                    CallRecord(
+                        model=model,
+                        schema=schema.__name__,
+                        input_tokens=usage.get("prompt_tokens"),
+                        output_tokens=usage.get("completion_tokens"),
+                        cached=False,
+                    )
+                )
+                return str(content)
+
+        return await call_with_fallback(call, self._models)
+
+
 def cache_key(prompt: str, schema: type[BaseModel], media: list[Media] | None) -> str:
     h = hashlib.sha256()
     h.update(schema.__name__.encode())

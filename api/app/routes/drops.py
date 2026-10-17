@@ -19,7 +19,7 @@ from app.events import TERMINAL, bus
 from app.schema_gen import TranscriptLine
 from pipeline import fetch
 from pipeline.errors import ErrorCode, PipelineError
-from pipeline.llm import LLM, CachedLLM, FixtureLLM, GeminiLLM
+from pipeline.llm import LLM, CachedLLM, FixtureLLM, GeminiLLM, GroqLLM
 
 router = APIRouter(prefix="/api/drops", tags=["drops"])
 
@@ -30,13 +30,17 @@ def get_llm_factory() -> Callable[[], LLM]:
     if settings.llm_fixture:
         responses = json.loads(Path(settings.llm_fixture).read_text())
         return lambda: FixtureLLM(responses, cycle=True)
+
     def build() -> LLM:
-        gemini = GeminiLLM(
-            settings.gemini_api_key,
-            settings.llm_models,
-            thinking_budget=settings.llm_thinking_budget,
-        )
-        return CachedLLM(gemini, settings.llm_cache_dir) if settings.llm_cache else gemini
+        if settings.llm_provider == "groq":
+            llm: LLM = GroqLLM(settings.groq_api_key, settings.llm_models)
+        else:
+            llm = GeminiLLM(
+                settings.gemini_api_key,
+                settings.llm_models,
+                thinking_budget=settings.llm_thinking_budget,
+            )
+        return CachedLLM(llm, settings.llm_cache_dir) if settings.llm_cache else llm
 
     return build
 

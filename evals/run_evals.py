@@ -34,7 +34,7 @@ from app.config import settings  # noqa: E402
 from pipeline import fetch  # noqa: E402
 from pipeline.errors import PipelineError  # noqa: E402
 from pipeline.extract import EXTRACT_PROMPT  # noqa: E402
-from pipeline.llm import CachedLLM, GeminiLLM  # noqa: E402
+from pipeline.llm import LLM, CachedLLM, GeminiLLM, GroqLLM  # noqa: E402
 from pipeline.run import DropInput, RunConfig, run_pipeline  # noqa: E402
 
 DATASET = ROOT / "evals" / "dataset.jsonl"
@@ -179,8 +179,14 @@ async def main() -> None:
 
     dataset = load_dataset(args.dataset)
     only = {i for i in args.only.split(",") if i}
+    if settings.llm_provider == "groq":
+        underlying: LLM = GroqLLM(settings.groq_api_key, settings.llm_models)
+    else:
+        underlying = GeminiLLM(
+            settings.gemini_api_key, settings.llm_models, settings.llm_thinking_budget
+        )
     llm = CachedLLM(
-        GeminiLLM(settings.gemini_api_key, settings.llm_models, settings.llm_thinking_budget),
+        underlying,
         settings.llm_cache_dir,
         read=not args.no_cache,
     )

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -291,3 +292,38 @@ def test_whisper_prompt_echo_is_dropped() -> None:
     echo = _Segment(start=0, end=5, text=" A tutor, coach or mentor describes their sessions.")
     real = _Segment(start=5, end=9, text="I coach cricket for kids on weekends.")
     assert drop_hint_echoes([echo, real], hint) == [real]
+
+
+async def test_groq_llm_requires_api_key() -> None:
+    from pipeline.llm import GroqLLM
+
+    with pytest.raises(PipelineError) as exc:
+        GroqLLM(api_key="")
+    assert exc.value.code == ErrorCode.LLM_UNAVAILABLE
+
+
+async def test_groq_llm_generates_json_and_records_usage(monkeypatch: pytest.MonkeyPatch) -> None:
+    import httpx
+    from pydantic import BaseModel
+
+    from pipeline.llm import GroqLLM
+
+    class Dummy(BaseModel):
+        name: str
+
+    fake_response = {
+        "choices": [{"message": {"content": '{"name": "math"}'}}],
+        "usage": {"prompt_tokens": 12, "completion_tokens": 4},
+    }
+
+    async def mock_post(*args: Any, **kwargs: Any) -> httpx.Response:
+        return httpx.Response(200, json=fake_response)
+
+    monkeypatch.setattr(httpx.AsyncClient, "post", mock_post)
+
+    llm = GroqLLM(api_key="gsk_test", models=["openai/gpt-oss-120b"])
+    res = await llm.generate_json(prompt="hello", schema=Dummy)
+    assert res == '{"name": "math"}'
+    assert len(llm.calls) == 1
+    assert llm.calls[0].model == "openai/gpt-oss-120b"
+    assert llm.calls[0].input_tokens == 12

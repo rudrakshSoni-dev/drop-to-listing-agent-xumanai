@@ -16,12 +16,34 @@ def _env(name: str, default: str = "") -> str:
 
 @dataclass(frozen=True)
 class Settings:
+    llm_provider: Literal["groq", "gemini"] = field(
+        default_factory=lambda: cast(
+            Literal["groq", "gemini"],
+            _env(
+                "LLM_PROVIDER",
+                "groq" if _env("GROQ_API_KEY") or not _env("GEMINI_API_KEY") else "gemini",
+            ),
+        )
+    )
+    groq_api_key: str = field(default_factory=lambda: _env("GROQ_API_KEY"))
     gemini_api_key: str = field(default_factory=lambda: _env("GEMINI_API_KEY"))
-    # Ordered list of models to try; later ones take over when earlier ones are
-    # overloaded or out of daily quota (free tier: ~20 requests/day per model).
+    # Ordered list of models to try. Defaults to openai/gpt-oss-120b for Groq.
     llm_models: list[str] = field(
         default_factory=lambda: [
-            m.strip() for m in (_env("LLM_MODELS") or _env("LLM_MODEL")).split(",") if m.strip()
+            m.strip()
+            for m in (
+                _env("LLM_MODELS")
+                or _env("LLM_MODEL")
+                or (
+                    "openai/gpt-oss-120b,llama-3.3-70b-versatile"
+                    if (
+                        _env("LLM_PROVIDER") != "gemini"
+                        and (_env("GROQ_API_KEY") or not _env("GEMINI_API_KEY"))
+                    )
+                    else "gemini-3.8-flash,gemini-3.7-flash,gemini-3.6-flash"
+                )
+            ).split(",")
+            if m.strip()
         ]
     )
     # Gemini thinking budget in tokens; 0 = off (fastest), "default" = model default.
