@@ -9,9 +9,22 @@ import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://drop2list.vercel.app"),
   title: { default: "Drop2List: turn a video into a bookable listing", template: "%s · Drop2List" },
   description:
     "Paste a Reel, TikTok or YouTube link. Drop2List transcribes it, understands the service, checks it for youth-safety risks, and hands you a listing ready to book.",
+  openGraph: {
+    title: "Drop2List: turn a video into a bookable listing",
+    description:
+      "Paste a Reel, TikTok or YouTube link. Drop2List transcribes it, understands the service, checks it for youth-safety risks, and hands you a listing ready to book.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Drop2List: turn a video into a bookable listing",
+    description:
+      "Paste a Reel, TikTok or YouTube link. Drop2List transcribes it, understands the service, checks it for youth-safety risks, and hands you a listing ready to book.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
