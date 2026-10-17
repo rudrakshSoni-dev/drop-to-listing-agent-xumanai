@@ -3,6 +3,7 @@
     make evals                      # every row; reuses finished rows (free)
     make evals ARGS="--fresh"       # re-run every row (LLM responses still cached)
     make evals ARGS="--only id1,id2"
+    make evals ARGS="--only id1 --no-cache"   # re-time a row (one model request)
 
 Each row downloads the public video, transcribes it locally and makes one Gemini
 call (cached on disk). Per-row results are kept in api/data/eval_runs/, so a rerun
@@ -18,6 +19,7 @@ import json
 import sys
 import tempfile
 import time
+from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -141,13 +143,17 @@ def build_results(
             }
         )
 
-    models = sorted({rec["model"] for rec in records.values() if rec.get("model")})
+    # Free-tier rotation means one run can mix models; say how many rows each answered.
+    rows_per_model = dict(
+        Counter(rec["model"] for rec in records.values() if rec.get("model")).most_common()
+    )
     return {
         "meta": {
             "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "dataset_size": len(dataset),
             "prompt": EXTRACT_PROMPT,
-            "models": models,
+            "models": list(rows_per_model),
+            "rows_per_model": rows_per_model,
             "transcribe_backend": settings.transcribe_backend,
             "whisper_model": settings.whisper_model,
             "latency_note": "Wall time per video on the machine that ran the evals (download, "
@@ -164,6 +170,11 @@ async def main() -> None:
     parser.add_argument("--dataset", type=Path, default=DATASET)
     parser.add_argument("--fresh", action="store_true", help="ignore stored per-row runs")
     parser.add_argument("--only", default="", help="comma-separated row ids")
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="call the model even when a cached answer exists (to re-time rows)",
+    )
     args = parser.parse_args()
 
     dataset = load_dataset(args.dataset)
@@ -171,6 +182,7 @@ async def main() -> None:
     llm = CachedLLM(
         GeminiLLM(settings.gemini_api_key, settings.llm_models, settings.llm_thinking_budget),
         settings.llm_cache_dir,
+        read=not args.no_cache,
     )
     RUNS.mkdir(parents=True, exist_ok=True)
 

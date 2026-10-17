@@ -191,13 +191,15 @@ class CachedLLM:
 
     inner: LLM
     cache_dir: Path
+    # False still writes answers but never serves them (fresh calls, e.g. for timing).
+    read: bool = True
     calls: list[CallRecord] = field(default_factory=list)
 
     async def generate_json(
         self, *, prompt: str, schema: type[BaseModel], media: list[Media] | None = None
     ) -> str:
         path = self.cache_dir / f"{cache_key(prompt, schema, media)}.json"
-        if path.exists():
+        if self.read and path.exists():
             entry = json.loads(path.read_text())
             self.calls.append(
                 CallRecord(entry.get("model", "?"), schema.__name__, None, None, cached=True)

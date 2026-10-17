@@ -99,7 +99,7 @@ class ExtractedListing(BaseModel):
 SESSION_MIN, SESSION_MAX = 15, 240
 
 # Bump with a new prompts/extract_vN.md; evals record which version produced a result.
-EXTRACT_PROMPT = "extract_v4"
+EXTRACT_PROMPT = "extract_v5"
 
 
 def format_transcript(lines: list[TranscriptLine]) -> str:

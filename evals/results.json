@@ -1,14 +1,18 @@
 {
  "meta": {
-  "run_at": "2026-10-16T20:30:23+00:00",
+  "run_at": "2026-10-16T21:37:00+00:00",
   "dataset_size": 26,
-  "prompt": "extract_v4",
+  "prompt": "extract_v5",
   "models": [
-   "gemini-2.5-flash",
-   "gemini-2.5-flash-lite",
+   "gemini-3.7-flash",
    "gemini-3.1-flash-lite",
-   "gemini-3.6-flash"
+   "gemini-3.8-flash"
   ],
+  "rows_per_model": {
+   "gemini-3.7-flash": 12,
+   "gemini-3.1-flash-lite": 10,
+   "gemini-3.8-flash": 4
+  },
   "transcribe_backend": "whisper",
   "whisper_model": "small.en",
   "latency_note": "Wall time per video on the machine that ran the evals (download, local transcription, frames, one model call); rows whose model answer came from cache are excluded."
@@ -67,13 +71,13 @@
   },
   "age": {
    "n": 13,
-   "mean_iou": 0.8434615384615385,
-   "accuracy_iou_50": 0.8461538461538461
+   "mean_iou": 0.8236923076923077,
+   "accuracy_iou_50": 0.9230769230769231
   },
   "format": {
    "group_accuracy": 1.0,
    "group_n": 7,
-   "mode_accuracy": 0.8333333333333334,
+   "mode_accuracy": 0.9166666666666666,
    "mode_n": 12
   },
   "guardrails": {
@@ -93,7 +97,7 @@
     "precision": 0.0,
     "recall": null,
     "support": 0,
-    "predicted": 1
+    "predicted": 5
    },
    "AGE_MISMATCH": {
     "precision": null,
@@ -108,24 +112,24 @@
     "predicted": 0
    },
    "UNSAFE_ACTIVITY": {
-    "precision": 0.0,
+    "precision": null,
     "recall": null,
     "support": 0,
-    "predicted": 1
+    "predicted": 0
    },
    "ALL": {
-    "precision": 0.5714285714285714,
+    "precision": 0.47058823529411764,
     "recall": 0.8888888888888888,
     "support": 9,
-    "predicted": 14
+    "predicted": 17
    }
   },
   "latency_s": {
-   "p50": 32.39,
-   "p95": 63.09,
+   "p50": 43.65,
+   "p95": 175.7,
    "n": 26
   },
-  "tokens_per_listing": 6292.038461538462
+  "tokens_per_listing": 8183.2307692307695
  },
  "rows": [
   {
@@ -146,7 +150,7 @@
     "flags": []
    },
    "predicted": {
-    "title": "Comprehensive Math Tutoring for All Levels",
+    "title": "Comprehensive K-12 Math Tutoring",
     "category": "academic_tutoring",
     "age_range": {
      "min": 6,
@@ -157,6 +161,7 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -169,7 +174,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 37.99,
+   "latency_s": 44.73,
    "transcript_excerpt": "Hello, my name is Deborah. I am a math tutor and listed value. I have been tutoring math for the past three years now. It is a critical subject and I'm very very passionate about it. I have taught various ages of students ranging from elementary school to junior school and even h"
   },
   {
@@ -187,7 +192,7 @@
     "flags": []
    },
    "predicted": {
-    "title": "Online Mathematics Tutoring for Basic and Advanced Math",
+    "title": "Online Mathematics Tutoring and Exam Preparation",
     "category": "academic_tutoring",
     "age_range": {
      "min": 10,
@@ -198,6 +203,7 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -210,7 +216,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 24.61,
+   "latency_s": 27.05,
    "transcript_excerpt": "Aslam Likum students, my name is Sugrabatul. I have done BS Mathematics in 2013. Since then, I am attached to the teaching field. Currently, I am working in a software-based organization where I do video lectures. I use different technologies to teach my students so that they can"
   },
   {
@@ -231,30 +237,31 @@
     "flags": []
    },
    "predicted": {
-    "title": "Friendly English Tutor for Kids & Beginners",
+    "title": "Personalized English Language Tutoring",
     "category": "academic_tutoring",
     "age_range": {
      "min": 5,
-     "max": 12
+     "max": 18
     },
     "format": {
      "group": "one_on_one",
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
     "error": false,
     "category_ok": true,
-    "age_iou": 1.0,
+    "age_iou": 0.571,
     "group_ok": null,
     "mode_ok": true,
     "flags_missed": [],
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 31.08,
+   "latency_s": 43.65,
    "transcript_excerpt": "Hello and welcome. My name is Jamie Lee and I'm from beautiful Cape Town, South Africa. It's so lovely to meet you. I'm a qualified TEFL teacher with a Bachelor of Applied Social Sciences in Counseling and Psychology, as well as several years of experience in student support and "
   },
   {
@@ -275,7 +282,7 @@
     "flags": []
    },
    "predicted": {
-    "title": "Physics and Math Tutoring for Cambridge Curriculum",
+    "title": "Online STEM Tutoring: Math, Physics, and Chemistry",
     "category": "academic_tutoring",
     "age_range": {
      "min": 11,
@@ -286,6 +293,7 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -298,7 +306,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 48.64,
+   "latency_s": 45.41,
    "transcript_excerpt": "Hello, my name is Afifa and I'm from Pakistan. I am an electrical engineer, so being from an engineering background, I can quite efficiently help out students in the subjects mathematics, physics as well as chemistry. I have been online tutoring students for more than two years n"
   },
   {
@@ -319,10 +327,10 @@
     "flags": []
    },
    "predicted": {
-    "title": "Biology Tutoring for High School and College Students",
+    "title": "High School Biology & AP Exam Prep Tutoring",
     "category": "academic_tutoring",
     "age_range": {
-     "min": 14,
+     "min": 13,
      "max": 18
     },
     "format": {
@@ -330,19 +338,20 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
     "error": false,
     "category_ok": true,
-    "age_iou": 1.0,
+    "age_iou": 0.833,
     "group_ok": null,
     "mode_ok": null,
     "flags_missed": [],
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 21.08,
+   "latency_s": 23.33,
    "transcript_excerpt": "Hello, my name is Erin and I live in the United States. I have a degree in environmental science and I'm excited for the opportunity to be your biology tutor. I have a background in ecology, botany and environmental science and I specialize in tutoring high school students and co"
   },
   {
@@ -360,20 +369,19 @@
     "flags": []
    },
    "predicted": {
-    "title": "English Tutoring for Kids, Teens, and Adults",
+    "title": "Online English Lessons with a Certified TEFL Tutor",
     "category": "academic_tutoring",
     "age_range": {
-     "min": 10,
-     "max": 18
+     "min": 5,
+     "max": 12
     },
     "format": {
      "group": "one_on_one",
      "mode": "virtual"
     },
-    "flags": [
-     "UNVERIFIED_CREDENTIAL"
-    ],
-    "status": "warn"
+    "flags": [],
+    "flag_evidence": [],
+    "status": "pass"
    },
    "score": {
     "error": false,
@@ -382,12 +390,10 @@
     "group_ok": null,
     "mode_ok": null,
     "flags_missed": [],
-    "flags_extra": [
-     "UNVERIFIED_CREDENTIAL"
-    ]
+    "flags_extra": []
    },
    "error": null,
-   "latency_s": 31.28,
+   "latency_s": 34.05,
    "transcript_excerpt": "Hi everyone, my name is Prilin, I'm 20 years old and I'm from the very beautiful country, South Africa. I'm a newly certified English teacher with a 168 hour TEFL certificate. I'm qualified to teach kids, young professionals and also adults. My native language is English, my seco"
   },
   {
@@ -408,10 +414,10 @@
     "flags": []
    },
    "predicted": {
-    "title": "Online Math Tutoring for Exam Preparation",
+    "title": "Online Math Tutoring & Exam Preparation",
     "category": "academic_tutoring",
     "age_range": {
-     "min": 13,
+     "min": 12,
      "max": 18
     },
     "format": {
@@ -419,19 +425,20 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
     "error": false,
     "category_ok": true,
-    "age_iou": 0.429,
+    "age_iou": 0.571,
     "group_ok": true,
     "mode_ok": true,
     "flags_missed": [],
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 23.04,
+   "latency_s": 44.8,
    "transcript_excerpt": "Hi, I'm Swastik. And I'm Swata. We've been learning maths from Kritika Mamsa the past two years. She has helped me study maths since year 8 and thanks to her help I passed the Dromanash entrance exam. We discuss complicated maths problems and the level of understanding built help"
   },
   {
@@ -451,10 +458,10 @@
     ]
    },
    "predicted": {
-    "title": "Free Online Homework Help for Metro Atlanta Students",
+    "title": "On-Demand Online Homework Support & Tutoring",
     "category": "homework_support",
     "age_range": {
-     "min": 10,
+     "min": 6,
      "max": 18
     },
     "format": {
@@ -462,7 +469,20 @@
      "mode": "virtual"
     },
     "flags": [
-     "OFF_PLATFORM_CONTACT"
+     "OFF_PLATFORM_CONTACT",
+     "UNVERIFIED_CREDENTIAL"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "Then, she went to TutorATL.org and got connected with a tutor online for free.",
+      "timestamp_s": 20.22
+     },
+     {
+      "code": "UNVERIFIED_CREDENTIAL",
+      "evidence": "expert tutors",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -473,10 +493,12 @@
     "group_ok": null,
     "mode_ok": true,
     "flags_missed": [],
-    "flags_extra": []
+    "flags_extra": [
+     "UNVERIFIED_CREDENTIAL"
+    ]
    },
    "error": null,
-   "latency_s": 16.98,
+   "latency_s": 18.9,
    "transcript_excerpt": "This is Maddie. She's been struggling with her homework. Just a little bit. Dad hasn't been much help. Yeah, I don't remember any of that. And mom? Nope. Then, she went to TutorATL.org and got connected with a tutor online for free."
   },
   {
@@ -497,7 +519,7 @@
     "flags": []
    },
    "predicted": {
-    "title": "Free Math and Science Tutoring for Grades 6-12",
+    "title": "Middle & High School Math and Science Tutoring",
     "category": "academic_tutoring",
     "age_range": {
      "min": 11,
@@ -508,6 +530,7 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -520,7 +543,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 26.28,
+   "latency_s": 30.75,
    "transcript_excerpt": "So there's this hill, and its measurements can be placed on a two-dimensional linear graph and x equals 5 y. At Ask Rose, the hill we're climbing is the challenge of providing Indiana students with world-class tutoring, at no cost to them. And m is the slope and b is the y-interc"
   },
   {
@@ -547,28 +570,43 @@
     "category": "stem_coding_robotics",
     "age_range": {
      "min": 9,
-     "max": 18
+     "max": 16
     },
     "format": {
      "group": "small_group",
      "mode": "virtual"
     },
     "flags": [
-     "OFF_PLATFORM_CONTACT"
+     "OFF_PLATFORM_CONTACT",
+     "UNVERIFIED_CREDENTIAL"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "\u2026mprehensive Information and a Glimpse into Our Educational Services!\n\nhttps://lacashometutors.com/\n0317-4859190\n\nStay Connected: Follow Us on Social Media for the Lates\u2026",
+      "timestamp_s": null
+     },
+     {
+      "code": "UNVERIFIED_CREDENTIAL",
+      "evidence": "Our expert instructors guide them every step of the way.",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
    "score": {
     "error": false,
     "category_ok": true,
-    "age_iou": 0.286,
+    "age_iou": 0.333,
     "group_ok": null,
     "mode_ok": true,
     "flags_missed": [],
-    "flags_extra": []
+    "flags_extra": [
+     "UNVERIFIED_CREDENTIAL"
+    ]
    },
    "error": null,
-   "latency_s": 15.95,
+   "latency_s": 24.68,
    "transcript_excerpt": "Coding classes for kids. Beginner to Advanced. Computer course?"
   },
   {
@@ -589,30 +627,31 @@
     "flags": []
    },
    "predicted": {
-    "title": "YEL Robotics Classes for Kids",
+    "title": "Hands-On Robotics and Coding Classes for Kids",
     "category": "stem_coding_robotics",
     "age_range": {
-     "min": 6,
-     "max": 14
+     "min": 5,
+     "max": 12
     },
     "format": {
      "group": "small_group",
      "mode": "in_person"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
     "error": false,
     "category_ok": true,
-    "age_iou": 0.7,
+    "age_iou": 1.0,
     "group_ok": true,
     "mode_ok": null,
     "flags_missed": [],
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 18.17,
+   "latency_s": 17.64,
    "transcript_excerpt": "B-B-Boom-boom-boom-boom-boom-boom-boom-boom-boom."
   },
   {
@@ -632,7 +671,7 @@
     ]
    },
    "predicted": {
-    "title": "Robotics and Coding Classes for Students",
+    "title": "Hands-On Robotics and Coding for Schools",
     "category": "stem_coding_robotics",
     "age_range": {
      "min": 8,
@@ -643,7 +682,20 @@
      "mode": "in_person"
     },
     "flags": [
-     "OFF_PLATFORM_CONTACT"
+     "OFF_PLATFORM_CONTACT",
+     "UNVERIFIED_CREDENTIAL"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "\u2026make STEM education fun, interactive, and accessible.\n\n\ud83c\udf10 Learn More: https://www.kod2kids.com\n\n\ud83d\udcde Contact for School Partnership",
+      "timestamp_s": null
+     },
+     {
+      "code": "UNVERIFIED_CREDENTIAL",
+      "evidence": "Expert trainers",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -654,11 +706,13 @@
     "group_ok": true,
     "mode_ok": false,
     "flags_missed": [],
-    "flags_extra": []
+    "flags_extra": [
+     "UNVERIFIED_CREDENTIAL"
+    ]
    },
    "error": null,
-   "latency_s": 47.45,
-   "transcript_excerpt": "Namaskar. Code to kids."
+   "latency_s": 56.21,
+   "transcript_excerpt": "Namaskar, Code to Kids is the school that teaches kids and kids. It is also available for kids and kids. The future technology is also available for kids. For robotics classes, budget coding is available for kids and kids. And for robots, it is available for kids and kids. It is "
   },
   {
    "id": "VjhzNhOjgT4",
@@ -677,17 +731,18 @@
     ]
    },
    "predicted": {
-    "title": "Creative Arts and Craft Instruction",
+    "title": "Art & Craft Lessons for Children and Youth",
     "category": "arts_music",
     "age_range": {
-     "min": 6,
-     "max": 12
+     "min": 5,
+     "max": 18
     },
     "format": {
-     "group": "one_on_one",
-     "mode": "virtual"
+     "group": "small_group",
+     "mode": "in_person"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -702,8 +757,8 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 46.35,
-   "transcript_excerpt": "This is a video of my teacher, Vailu Maruna. She is a student of I-10 craft and a teacher of mine. She taught me how to do it. She taught me how to do it. She taught me how to do it. If you like this video, please like, share it with your friends and friends. If you like this vid"
+   "latency_s": 83.99,
+   "transcript_excerpt": "I am a teacher for all my students, women, and youth. I am a teacher for all my students. My teacher is my teacher. She is my teacher in Covid 19. I am also my teacher in my school. If you like this video, please like, share it with your friends and friends. If you like this vide"
   },
   {
    "id": "95_vAjcmmz0",
@@ -720,18 +775,25 @@
     "flags": []
    },
    "predicted": {
-    "title": "Drawing and Fine Arts Fundamentals",
+    "title": "Drawing and Fine Arts Class",
     "category": "arts_music",
     "age_range": {
      "min": 6,
      "max": 14
     },
     "format": {
-     "group": "one_on_one",
+     "group": "small_group",
      "mode": "hybrid"
     },
     "flags": [
      "OFF_PLATFORM_CONTACT"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "\u2026cialist and English pedagogue. Author of 4 books. \n\nOur New channel - https://www.youtube.com/c/VlogbyManojSharma {INTERVIEW GUIDE}\n\nAmazon PD CLASSES Books - \n70 ways of spoken Engli\u2026",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -747,7 +809,7 @@
     ]
    },
    "error": null,
-   "latency_s": 51.79,
+   "latency_s": 110.66,
    "transcript_excerpt": "Good morning class, I am Aransha, your drawing teacher."
   },
   {
@@ -765,10 +827,10 @@
     "flags": []
    },
    "predicted": {
-    "title": "Public Speaking and Presentation Skills Workshop",
+    "title": "Presentation and Public Speaking Basics for Kids",
     "category": "communication_public_speaking",
     "age_range": {
-     "min": 8,
+     "min": 7,
      "max": 14
     },
     "format": {
@@ -776,6 +838,7 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -788,7 +851,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 44.87,
+   "latency_s": 85.4,
    "transcript_excerpt": "My name is Kenna, and I'm going to teach you how to do a great presentation. It's my version of a TED Talk. Number one, entrance. When you walk in, you have to be confident. Smile. If you don't smile, the audience is going to be like, what? You have to walk in confidently. You sh"
   },
   {
@@ -806,10 +869,10 @@
     "flags": []
    },
    "predicted": {
-    "title": "Introduction to Competitive Debate Skills",
+    "title": "Debating and Public Speaking Fundamentals",
     "category": "communication_public_speaking",
     "age_range": {
-     "min": 12,
+     "min": 10,
      "max": 18
     },
     "format": {
@@ -817,6 +880,7 @@
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -829,7 +893,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 53.63,
+   "latency_s": 175.7,
    "transcript_excerpt": "A debate is a discussion of a theme or question between two or more interlocutors. In a formal debate, the theme or question is called a motion. The motion is usually controversial and has no clear or correct answer. An example of a motion might be, everybody should get universal"
   },
   {
@@ -850,7 +914,7 @@
     "flags": []
    },
    "predicted": {
-    "title": "Purposeful Fun Soccer Coaching Series",
+    "title": "Early Childhood Soccer Fundamentals & Purposeful Play",
     "category": "sports_fitness_wellness",
     "age_range": {
      "min": 3,
@@ -858,9 +922,10 @@
     },
     "format": {
      "group": "small_group",
-     "mode": "virtual"
+     "mode": "in_person"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -868,12 +933,12 @@
     "category_ok": true,
     "age_iou": 1.0,
     "group_ok": null,
-    "mode_ok": false,
+    "mode_ok": true,
     "flags_missed": [],
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 32.39,
+   "latency_s": 74.71,
    "transcript_excerpt": "Soccer for my entire life. I'm the first American to earn a professional coaching diploma in Germany. I've coached at Harvard University and I've worked with many pro teams in Europe, including A.C. Milan. I've taken everything I've learned over the years, including the past nine"
   },
   {
@@ -891,17 +956,18 @@
     "flags": []
    },
    "predicted": {
-    "title": "Financial Literacy Basics for Students",
+    "title": "Introduction to Financial Literacy for Students",
     "category": "leadership_life_skills",
     "age_range": {
-     "min": 14,
+     "min": 13,
      "max": 18
     },
     "format": {
-     "group": "small_group",
+     "group": "one_on_one",
      "mode": "virtual"
     },
     "flags": [],
+    "flag_evidence": [],
     "status": "pass"
    },
    "score": {
@@ -914,7 +980,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 45.17,
+   "latency_s": 182.17,
    "transcript_excerpt": "What is financial literacy? Financial literacy or financial education is the ability to understand and effectively apply various financial skills, including but not limited, to personal financial management, budgeting, savings, and investing. Financial literacy is essential to un"
   },
   {
@@ -935,7 +1001,7 @@
     "title": "Developing Essential Soft Skills for Career Success",
     "category": "leadership_life_skills",
     "age_range": {
-     "min": 14,
+     "min": 13,
      "max": 18
     },
     "format": {
@@ -944,6 +1010,13 @@
     },
     "flags": [
      "OFF_PLATFORM_CONTACT"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "John K. Whitehead & Associates, http://johnkywhitehead.ca",
+      "timestamp_s": 125.21
+     }
     ],
     "status": "block"
    },
@@ -959,7 +1032,7 @@
     ]
    },
    "error": null,
-   "latency_s": 48.22,
+   "latency_s": 50.62,
    "transcript_excerpt": "So, what are these things called soft skills? Soft skills is a catch-all term referring to various behaviors that help people work and socialize well with others. In short, they are the good manners and personality traits needed to get along with others and build positive relatio"
   },
   {
@@ -990,8 +1063,14 @@
      "mode": "virtual"
     },
     "flags": [
-     "OFF_PLATFORM_CONTACT",
-     "UNSAFE_ACTIVITY"
+     "OFF_PLATFORM_CONTACT"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "How To Teach Kids Chess!\n\n\u27a1\ufe0f Learn Chess On My Main:  https://www.twitch.tv/gothamchess\n\u27a1\ufe0f My Chess Courses:  https://www.chessly.com\n\n\u27a1\ufe0f EDITED BY: https://\u2026",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -1002,12 +1081,10 @@
     "group_ok": null,
     "mode_ok": null,
     "flags_missed": [],
-    "flags_extra": [
-     "UNSAFE_ACTIVITY"
-    ]
+    "flags_extra": []
    },
    "error": null,
-   "latency_s": 26.84,
+   "latency_s": 28.55,
    "transcript_excerpt": "Your daughter is three, should you teach her chess? No, don't force chess on your kids. It's like forcing religion on them or abstinence. Kids will naturally become averse to something that you pressure on them. Have them play with the chess pieces. The first thing the kids need "
   },
   {
@@ -1031,7 +1108,7 @@
     "title": "College Admission and Career Counseling",
     "category": "mentoring",
     "age_range": {
-     "min": 15,
+     "min": 14,
      "max": 18
     },
     "format": {
@@ -1039,23 +1116,37 @@
      "mode": "virtual"
     },
     "flags": [
-     "OFF_PLATFORM_CONTACT"
+     "OFF_PLATFORM_CONTACT",
+     "UNVERIFIED_CREDENTIAL"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "you can call any of the numbers below",
+      "timestamp_s": 64.3
+     },
+     {
+      "code": "UNVERIFIED_CREDENTIAL",
+      "evidence": "Having been experts in this field since 2004",
+      "timestamp_s": 27.5
+     }
     ],
     "status": "block"
    },
    "score": {
     "error": false,
     "category_ok": true,
-    "age_iou": 0.75,
+    "age_iou": 0.6,
     "group_ok": null,
     "mode_ok": null,
     "flags_missed": [],
     "flags_extra": [
-     "OFF_PLATFORM_CONTACT"
+     "OFF_PLATFORM_CONTACT",
+     "UNVERIFIED_CREDENTIAL"
     ]
    },
    "error": null,
-   "latency_s": 44.55,
+   "latency_s": 34.08,
    "transcript_excerpt": "Hi there, you're probably wondering which career path is best suited for you, or which college you should choose next. If that's the case, you're in the right place. When in doubt, you want someone competent who can guide you to your goal. A companion who is genuine, a friend who"
   },
   {
@@ -1078,7 +1169,7 @@
     ]
    },
    "predicted": {
-    "title": "College Admissions and University Life Mentoring",
+    "title": "College Admissions and University Mentoring",
     "category": "mentoring",
     "age_range": {
      "min": 14,
@@ -1090,6 +1181,13 @@
     },
     "flags": [
      "OFF_PLATFORM_CONTACT"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "\u2026link provided below, and book a session today!\n\nYoung Mentor Program: https://sparkcareermentors.com/young-mentors\n\nFollow Spark Career Mentors to remain updated with our latest develo\u2026",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -1103,7 +1201,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 81.54,
+   "latency_s": 24.97,
    "transcript_excerpt": "SPARK's Young Mentor Program connects students and their parents with high-achieving college students from around the world. The program aims to provide insights into the college admissions process and life at university, directly from those who have experienced it first-hand, ou"
   },
   {
@@ -1124,7 +1222,7 @@
     "flags": []
    },
    "predicted": {
-    "title": "Personal Development Mentor Coaching for Youth",
+    "title": "Mentor Coaching for Teens and Young Adults",
     "category": "mentoring",
     "age_range": {
      "min": 13,
@@ -1134,8 +1232,17 @@
      "group": "one_on_one",
      "mode": "virtual"
     },
-    "flags": [],
-    "status": "pass"
+    "flags": [
+     "UNVERIFIED_CREDENTIAL"
+    ],
+    "flag_evidence": [
+     {
+      "code": "UNVERIFIED_CREDENTIAL",
+      "evidence": "named the most innovative life coaching company of our time by Her Life magazine",
+      "timestamp_s": 69.91
+     }
+    ],
+    "status": "warn"
    },
    "score": {
     "error": false,
@@ -1144,10 +1251,12 @@
     "group_ok": null,
     "mode_ok": null,
     "flags_missed": [],
-    "flags_extra": []
+    "flags_extra": [
+     "UNVERIFIED_CREDENTIAL"
+    ]
    },
    "error": null,
-   "latency_s": 63.09,
+   "latency_s": 59.18,
    "transcript_excerpt": "Hey there, I'm Michelle Marie King and I want to congratulate you for getting to this point in your life, the point where you are so amped up about your personal development that you manifested a mentor coaching opportunity. I built this program because it was exactly what I wish"
   },
   {
@@ -1167,10 +1276,10 @@
     ]
    },
    "predicted": {
-    "title": "Private IB and School Subject Tutoring",
+    "title": "Private IB and Academic Subject Tutoring",
     "category": "academic_tutoring",
     "age_range": {
-     "min": 12,
+     "min": 13,
      "max": 18
     },
     "format": {
@@ -1179,6 +1288,13 @@
     },
     "flags": [
      "OFF_PLATFORM_CONTACT"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "Best Tutors for IB | Online Classes for IB | www.edvi.app\n\nedvi provides private tutors (1-to-1) for all subjects and boards (I\u2026",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -1192,7 +1308,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 20.52,
+   "latency_s": 21.38,
    "transcript_excerpt": "Hi, my name is Fiksha and I'm a student of grade 12. I was fed up with taking trial classes. Most of the Indian tutors have no clue about the IB curriculum. I came to know about Edvi from one of my classmates. I was really satisfied with the trial classes and immediately enrolled"
   },
   {
@@ -1212,11 +1328,11 @@
     ]
    },
    "predicted": {
-    "title": "Private Online Tutoring for All Subjects and Boards",
+    "title": "Private Academic Tutoring for IGCSE and Other Boards",
     "category": "academic_tutoring",
     "age_range": {
-     "min": 10,
-     "max": 18
+     "min": 14,
+     "max": 15
     },
     "format": {
      "group": "one_on_one",
@@ -1224,6 +1340,13 @@
     },
     "flags": [
      "OFF_PLATFORM_CONTACT"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "Best tutors for Cambridge | Online tutor for IGCSE | www.edvi.app\n\nedvi provides private tutors (1-to-1) for all subjects and boards (I\u2026",
+      "timestamp_s": null
+     }
     ],
     "status": "block"
    },
@@ -1237,7 +1360,7 @@
     "flags_extra": []
    },
    "error": null,
-   "latency_s": 21.33,
+   "latency_s": 22.31,
    "transcript_excerpt": "Hello everyone, I am Aarushi and my brother Aman is in 9th grade. He moved to IGCSC curriculum this year and he was really struggling with English. We wasted 4 months trying many online apps and local tuition providers. Aman was not happy with any of them and his grades were gett"
   },
   {
@@ -1260,7 +1383,7 @@
     ]
    },
    "predicted": {
-    "title": "Personalized Home Tutoring for Classes 1\u201310",
+    "title": "Home Tutoring for Classes 1\u201310",
     "category": "academic_tutoring",
     "age_range": {
      "min": 6,
@@ -1273,6 +1396,18 @@
     "flags": [
      "OFF_PLATFORM_CONTACT",
      "PRIVATE_MEETING_MINOR"
+    ],
+    "flag_evidence": [
+     {
+      "code": "OFF_PLATFORM_CONTACT",
+      "evidence": "www.goldmindbeam.com par or find my tutor per click curry. Ya see they what's up curry?",
+      "timestamp_s": 44.41
+     },
+     {
+      "code": "PRIVATE_MEETING_MINOR",
+      "evidence": "Home Tuition",
+      "timestamp_s": 28.37
+     }
     ],
     "status": "block"
    },
@@ -1288,8 +1423,8 @@
     ]
    },
    "error": null,
-   "latency_s": 60.12,
-   "transcript_excerpt": "This is the concept of teaching. This is the concept of helping. This is the regular practice of teaching. This is the essay of mentoring and learning. This is the idea of teaching a teacher or a tutor to parents. This is the future of teaching. This is the class or subject of te"
+   "latency_s": 60.1,
+   "transcript_excerpt": "I spoke about some of these concepts. We got extra help from my regular practice teachers, and we got an Assam mentor and student learning and teaching. They had a teacher who taught in home tutor and parents. Tutors had experience. He could teach or be in a class or subject. And"
   }
  ]
 }
