@@ -1,7 +1,9 @@
 import logging
+import os
 import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +14,10 @@ from app.config import settings
 from app.errors import ApiError, api_error_handler
 from app.routes import drops, evals, listings
 from pipeline import transcribe
+
+_local_bin = Path(__file__).resolve().parent.parent / "bin"
+if _local_bin.exists() and str(_local_bin) not in os.environ.get("PATH", ""):
+    os.environ["PATH"] = f"{_local_bin}:{os.environ.get('PATH', '')}"
 
 logging.basicConfig(level=logging.INFO)
 

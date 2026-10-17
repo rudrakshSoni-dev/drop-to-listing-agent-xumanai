@@ -4,9 +4,17 @@ services:
     runtime: python
     rootDir: api
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      mkdir -p bin
+      if [ ! -f bin/ffmpeg ]; then
+        curl -sL https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar -xJ --strip-components=1 -C bin --wildcards '*/ffmpeg' 2>/dev/null || true
+        chmod +x bin/ffmpeg 2>/dev/null || true
+      fi
+      pip install -r requirements.txt
+    startCommand: PATH="$PWD/bin:$PATH" uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.9
       - key: LLM_PROVIDER
         value: groq
       - key: GROQ_API_KEY
