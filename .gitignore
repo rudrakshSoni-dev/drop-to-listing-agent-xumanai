@@ -16,5 +16,6 @@ api/data/
 next-env.d.ts
 *.tsbuildinfo
 
-# Assembled Hugging Face Space (deploy/hf-space/build.sh)
+# Assembled Hugging Face Spaces (deploy/hf-space/build.sh & deploy/hf-gradio/build.sh)
 deploy/hf-space/out/
+deploy/hf-gradio/out/
