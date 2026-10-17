@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: drop2list-api
+    runtime: python
+    rootDir: api
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: TRANSCRIBE_BACKEND
+        value: gemini
+      - key: DEMO_DROPS_PER_IP
+        value: "0"
