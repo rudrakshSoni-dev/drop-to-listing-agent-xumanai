@@ -3,6 +3,7 @@
 > **Turn short videos into ready-to-publish, bookable service listings.**  
 > A proof-of-work prototype for [Xuman.AI](https://xuman.ai) (*"turn content into instant booking"*).
 
+[![Live Demo](https://img.shields.io/badge/live%20demo-drop2list--web.vercel.app-0070f3.svg)](https://drop2list-web.vercel.app)
 [![Tests](https://img.shields.io/badge/tests-passing-emerald.svg)](Makefile)
 [![Playwright E2E](https://img.shields.io/badge/playwright-offline%20e2e%20passing-blue.svg)](web/e2e/main-path.spec.ts)
 [![Evaluations](https://img.shields.io/badge/evals-26%20public%20videos-purple.svg)](evals/results.json)
@@ -31,7 +32,7 @@ Drop2List collapses that 20-minute form-filling experience into a **30-second au
 
 ```mermaid
 flowchart LR
-    A["🎥 Drop Video\n(Link, Upload, or Replay Seed)"] --> B["⚡ Real-Time SSE\n(Whisper + ffmpeg + Gemini)"]
+    A["🎥 Drop Video\n(Link, Upload, or Replay Seed)"] --> B["⚡ Real-Time SSE\n(faster-whisper + ffmpeg + Groq)"]
     B --> C["📝 Listing Editor\n(Grounded confidence + safety flags)"]
     C --> D["📱 Mobile Swipe Card\n(Framer Motion)"]
     D --> E["✅ Instant Booking\n(Slot validation + .ics export)"]
