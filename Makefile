@@ -2,7 +2,7 @@ SHELL := /bin/bash
 PY := api/.venv/bin/python
 SCHEMA := packages/schema/listing.schema.json
 
-.PHONY: setup dev api web schema evals test
+.PHONY: setup dev api web schema evals test e2e
 
 setup:
 	python3 -m venv api/.venv
@@ -30,3 +30,7 @@ evals:
 test:
 	cd api && .venv/bin/ruff check . ../evals && .venv/bin/mypy --strict pipeline ../evals/metrics.py && .venv/bin/pytest -q
 	cd web && pnpm typecheck && pnpm lint && pnpm test
+
+# Offline browser smoke test of the main path (needs Chrome; no network or quota).
+e2e:
+	cd web && pnpm test:e2e
